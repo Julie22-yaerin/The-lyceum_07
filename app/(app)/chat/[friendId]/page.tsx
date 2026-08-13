@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeftIcon, SendIcon } from "@/components/icons";
 import { mockChatThreads, mockFriends } from "@/lib/mock-data";
+import { markThreadRead } from "@/lib/storage";
 import type { ChatMessage } from "@/lib/types";
 
 export default function ChatThreadPage({ params }: { params: { friendId: string } }) {
@@ -14,6 +15,10 @@ export default function ChatThreadPage({ params }: { params: { friendId: string 
   );
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [draft, setDraft] = useState("");
+
+  useEffect(() => {
+    markThreadRead(params.friendId);
+  }, [params.friendId]);
 
   const handleSend = () => {
     const text = draft.trim();

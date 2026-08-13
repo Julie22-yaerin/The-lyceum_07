@@ -80,8 +80,40 @@ export interface ChatMessage {
   time: string;
 }
 
+export const AVATAR_COLORS = [
+  "#5ac8fa",
+  "#0a84ff",
+  "#30d158",
+  "#ff9f0a",
+  "#ff453a",
+  "#bf5af2",
+] as const;
+
+export type AvatarColor = (typeof AVATAR_COLORS)[number];
+
 export interface UserProfile {
   name: string;
   handle: string;
+  bio: string;
+  avatarColor: AvatarColor;
+  avatarPhoto?: string | null;
   referralCode: string;
 }
+
+export interface Achievement {
+  id: string;
+  title: string;
+  caption: string;
+  earned: boolean;
+}
+
+export interface VideoComment {
+  id: string;
+  videoId: string;
+  authorName: string;
+  text: string;
+  mentions: string[];
+  createdAt: string;
+}
+
+export type ChatFilter = "primary" | "unread" | "read";

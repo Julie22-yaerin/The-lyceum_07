@@ -1,4 +1,12 @@
-import type { ChatMessage, Friend, QuizCardData, UserProfile, VideoItem } from "./types";
+import type {
+  Achievement,
+  ChatMessage,
+  Friend,
+  QuizCardData,
+  UserProfile,
+  VideoComment,
+  VideoItem,
+} from "./types";
 
 export const mockVideos: VideoItem[] = [
   {
@@ -88,8 +96,92 @@ export const mockLastMessage: Record<string, string> = {
   f3: "not losing to you, sending 3 more",
 };
 
+// Seed unread state for the demo — overridden by lib/storage.ts once a
+// thread has actually been opened.
+export const mockInitiallyUnread = new Set(["f1", "f2"]);
+
 export const mockProfile: UserProfile = {
   name: "You",
   handle: "@you",
+  bio: "Studying IGCSE the lazy way. 🔥21 streak and counting.",
+  avatarColor: "#5ac8fa",
+  avatarPhoto: null,
   referralCode: "LYCEUM-7F3K9",
+};
+
+export const mockAchievements: Achievement[] = [
+  {
+    id: "streak-7",
+    title: "Week One",
+    caption: "Hit a 7-day streak",
+    earned: true,
+  },
+  {
+    id: "streak-21",
+    title: "Locked In",
+    caption: "Hit a 21-day streak",
+    earned: true,
+  },
+  {
+    id: "first-quiz",
+    title: "First Recall",
+    caption: "Answered a quiz card",
+    earned: true,
+  },
+  {
+    id: "inviter",
+    title: "Recruiter",
+    caption: "Invited a friend",
+    earned: false,
+  },
+  {
+    id: "quiz-10",
+    title: "Sharp Ten",
+    caption: "Aced 10 quiz cards",
+    earned: false,
+  },
+  {
+    id: "night-owl",
+    title: "Night Owl",
+    caption: "Studied after midnight",
+    earned: false,
+  },
+];
+
+export const mockComments: Record<string, VideoComment[]> = {
+  v1: [
+    {
+      id: "c1",
+      videoId: "v1",
+      authorName: "Minh",
+      text: "wait this actually made it click for me",
+      mentions: [],
+      createdAt: "2h ago",
+    },
+    {
+      id: "c2",
+      videoId: "v1",
+      authorName: "Lan",
+      text: "@Khoa you need to see this before the quiz",
+      mentions: ["Khoa"],
+      createdAt: "1h ago",
+    },
+  ],
+  v4: [
+    {
+      id: "c3",
+      videoId: "v4",
+      authorName: "Khoa",
+      text: "not the reason I opened this app but ok",
+      mentions: [],
+      createdAt: "3h ago",
+    },
+  ],
+};
+
+export const mockLikeCounts: Record<string, number> = {
+  v1: 128,
+  v2: 64,
+  v3: 47,
+  v4: 512,
 };

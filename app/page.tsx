@@ -53,7 +53,7 @@ export default function Home() {
         </p>
         <div className="mt-7 flex flex-wrap items-center gap-3">
           <Link
-            href="/feed"
+            href="/onboarding"
             className="flex h-11 items-center rounded-pill bg-accent-strong px-6 text-[15px] font-semibold text-white transition-transform duration-100 ease-out active:scale-[0.97]"
           >
             Start scrolling

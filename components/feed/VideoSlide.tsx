@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import UniversalPlayer from "@/components/player/UniversalPlayer";
+import VideoActions from "@/components/feed/VideoActions";
 import type { PlayerType, ResolveResponse, VideoItem } from "@/lib/types";
 
 interface VideoSlideProps {
@@ -111,13 +112,16 @@ export default function VideoSlide({ video, isActive, shouldRender }: VideoSlide
   }
 
   return (
-    <UniversalPlayer
-      playerType={resolved.playerType}
-      embedUrl={resolved.embedUrl}
-      streamUrl={resolved.streamUrl}
-      iframeHtml={resolved.iframeHtml}
-      thumbnail={video.thumbnail_url}
-      isActive={isActive}
-    />
+    <div className="relative h-full w-full">
+      <UniversalPlayer
+        playerType={resolved.playerType}
+        embedUrl={resolved.embedUrl}
+        streamUrl={resolved.streamUrl}
+        iframeHtml={resolved.iframeHtml}
+        thumbnail={video.thumbnail_url}
+        isActive={isActive}
+      />
+      <VideoActions videoId={video.id} />
+    </div>
   );
 }

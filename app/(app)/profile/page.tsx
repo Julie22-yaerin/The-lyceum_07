@@ -2,17 +2,22 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ChevronRightIcon, CopyIcon, FlameIcon } from "@/components/icons";
+import { AwardIcon, ChevronRightIcon, CopyIcon, FlameIcon } from "@/components/icons";
 import ThemeToggle from "@/components/ThemeToggle";
-import { mockFriends, mockProfile } from "@/lib/mock-data";
+import { mockAchievements, mockFriends, mockProfile } from "@/lib/mock-data";
+import { getStoredProfile } from "@/lib/storage";
+import type { UserProfile } from "@/lib/types";
 
 export default function ProfilePage() {
   const [copied, setCopied] = useState(false);
+  const [profile, setProfile] = useState<UserProfile>(mockProfile);
   const [inviteLink, setInviteLink] = useState(
     `https://thelyceum.app/invite/${mockProfile.referralCode}`
   );
 
   useEffect(() => {
+    const stored = getStoredProfile();
+    if (stored) setProfile((prev) => ({ ...prev, ...stored }));
     setInviteLink(`${window.location.origin}/invite/${mockProfile.referralCode}`);
   }, []);
 
@@ -32,17 +37,37 @@ export default function ProfilePage() {
     <div className="h-screen w-full overflow-y-auto bg-bg pb-[100px] pt-[max(1.25rem,env(safe-area-inset-top))]">
       <div className="mx-auto max-w-[560px] px-4">
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-surface-3 text-[24px] font-semibold text-text">
-            {mockProfile.name.charAt(0).toUpperCase()}
-          </span>
-          <div>
-            <h1 className="text-[20px] font-bold tracking-[-0.02em] text-text">
-              {mockProfile.name}
-            </h1>
-            <p className="text-[13.5px] text-text-2">{mockProfile.handle}</p>
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-4">
+            <span
+              className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full text-[24px] font-semibold text-white"
+              style={{ backgroundColor: profile.avatarPhoto ? undefined : profile.avatarColor }}
+            >
+              {profile.avatarPhoto ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={profile.avatarPhoto} alt="" className="h-full w-full object-cover" />
+              ) : (
+                profile.name.charAt(0).toUpperCase()
+              )}
+            </span>
+            <div>
+              <h1 className="text-[20px] font-bold tracking-[-0.02em] text-text">
+                {profile.name}
+              </h1>
+              <p className="text-[13.5px] text-text-2">{profile.handle}</p>
+            </div>
           </div>
+          <Link
+            href="/onboarding?next=/profile"
+            className="flex h-9 shrink-0 items-center rounded-pill border border-hairline px-3.5 text-[13px] font-medium text-text-2 transition-colors duration-150 active:bg-surface-2"
+          >
+            Edit
+          </Link>
         </div>
+
+        {profile.bio && (
+          <p className="mt-3 text-[14px] leading-[1.5] text-text-2">{profile.bio}</p>
+        )}
 
         {/* Stats row — one panel, hairline-divided columns */}
         <div className="mt-5 grid grid-cols-3 divide-x divide-hairline overflow-hidden rounded-panel bg-surface shadow-panel">
@@ -60,6 +85,33 @@ export default function ProfilePage() {
           <div className="flex flex-col items-center gap-0.5 py-4">
             <span className="tabular-nums text-[18px] font-bold text-text">128</span>
             <span className="text-[11.5px] text-text-3">Reels watched</span>
+          </div>
+        </div>
+
+        {/* Achievements — independent badges, card grid */}
+        <div className="mt-5">
+          <h2 className="mb-2.5 text-[13px] font-semibold uppercase tracking-[0.08em] text-text-3">
+            Achievements
+          </h2>
+          <div className="grid grid-cols-2 gap-3">
+            {mockAchievements.map((achievement) => (
+              <div
+                key={achievement.id}
+                className={`rounded-card bg-surface p-3.5 shadow-panel ${
+                  achievement.earned ? "" : "opacity-40"
+                }`}
+              >
+                <AwardIcon
+                  width={20}
+                  height={20}
+                  className={achievement.earned ? "text-accent" : "text-text-4"}
+                />
+                <h3 className="mt-2 text-[14px] font-semibold text-text">{achievement.title}</h3>
+                <p className="mt-0.5 text-[12px] leading-[1.4] text-text-2">
+                  {achievement.caption}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
 

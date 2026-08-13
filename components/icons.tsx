@@ -135,3 +135,29 @@ export function MoonIcon(props: IconProps) {
     </svg>
   );
 }
+
+export function HeartIcon(props: IconProps) {
+  return (
+    <svg {...baseProps(props)}>
+      <path d="M12 20.5s-7.5-4.6-9.8-9.3C.7 7.8 2.3 4.5 5.6 3.9c2-.4 3.9.5 5 2.2 1.1-1.7 3-2.6 5-2.2 3.3.6 4.9 3.9 3.4 7.3-2.3 4.7-9.8 9.3-9.8 9.3z" />
+    </svg>
+  );
+}
+
+export function AwardIcon(props: IconProps) {
+  return (
+    <svg {...baseProps(props)}>
+      <circle cx="12" cy="9" r="5.5" />
+      <path d="M8.5 13.5 7 21l5-2.5L17 21l-1.5-7.5" />
+    </svg>
+  );
+}
+
+export function CameraIcon(props: IconProps) {
+  return (
+    <svg {...baseProps(props)}>
+      <path d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2l1-2h7l1 2h2A1.5 1.5 0 0 1 20 8.5v9A1.5 1.5 0 0 1 18.5 19h-13A1.5 1.5 0 0 1 4 17.5v-9z" />
+      <circle cx="12" cy="13" r="3.5" />
+    </svg>
+  );
+}
