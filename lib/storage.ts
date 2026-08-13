@@ -1,8 +1,10 @@
-import type { UserProfile, VideoComment } from "./types";
+import type { ChatMessage, UserProfile, VideoComment } from "./types";
 
 const PROFILE_KEY = "lyceum-profile";
+const READ_THREADS_KEY = "lyceum-read-threads";
 const LIKED_VIDEOS_KEY = "lyceum-liked-videos";
 const COMMENTS_KEY = "lyceum-comments";
+const SENT_MESSAGES_KEY = "lyceum-sent-messages";
 
 function readJSON<T>(key: string): T | null {
   try {
@@ -28,6 +30,30 @@ export function getStoredProfile(): Partial<UserProfile> | null {
 
 export function saveStoredProfile(profile: UserProfile): void {
   writeJSON(PROFILE_KEY, profile);
+}
+
+// ── Chat read/unread state ────────────────────────────────────────────
+export function getReadThreadIds(): Set<string> {
+  return new Set(readJSON<string[]>(READ_THREADS_KEY) ?? []);
+}
+
+export function markThreadRead(friendId: string): void {
+  const ids = getReadThreadIds();
+  if (ids.has(friendId)) return;
+  ids.add(friendId);
+  writeJSON(READ_THREADS_KEY, Array.from(ids));
+}
+
+// ── Chat messages sent from the Share action (video shares, per friend) ──
+export function getSentMessages(): Record<string, ChatMessage[]> {
+  return readJSON<Record<string, ChatMessage[]>>(SENT_MESSAGES_KEY) ?? {};
+}
+
+export function sendMessageToFriend(friendId: string, message: ChatMessage): void {
+  const all = getSentMessages();
+  const existing = all[friendId] ?? [];
+  all[friendId] = [...existing, message];
+  writeJSON(SENT_MESSAGES_KEY, all);
 }
 
 // ── Reels likes ────────────────────────────────────────────────────────

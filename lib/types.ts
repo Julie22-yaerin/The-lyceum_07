@@ -74,6 +74,23 @@ export interface Friend {
   streak_count: number;
 }
 
+export interface SharedVideoAttachment {
+  videoId: string;
+  platform: Platform;
+  originalUrl: string;
+  creatorHandle?: string | null;
+}
+
+export interface ChatMessage {
+  id: string;
+  fromMe: boolean;
+  text: string;
+  time: string;
+  sharedVideo?: SharedVideoAttachment;
+}
+
+export type ChatFilter = "primary" | "unread" | "read";
+
 export const AVATAR_COLORS = [
   "#5ac8fa",
   "#0a84ff",

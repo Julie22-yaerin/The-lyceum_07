@@ -2,15 +2,21 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ReelsIcon, UserIcon } from "@/components/icons";
+import { ChatIcon, ReelsIcon, UserIcon } from "@/components/icons";
 
 const TABS = [
   { href: "/feed", label: "Reels", icon: ReelsIcon },
+  { href: "/chat", label: "Chat", icon: ChatIcon },
   { href: "/profile", label: "Profile", icon: UserIcon },
 ] as const;
 
 export default function TabBar() {
   const pathname = usePathname();
+
+  // Chat threads get their own message-input bar — hide the tab bar there.
+  if (pathname.startsWith("/chat/") && pathname !== "/chat/") {
+    return null;
+  }
 
   return (
     <nav

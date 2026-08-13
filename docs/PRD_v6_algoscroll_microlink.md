@@ -324,9 +324,21 @@ All of this is client-side and `localStorage`-backed (`lib/storage.ts`) — ther
   - **Bug caught in testing and fixed**: the action rail was originally positioned `bottom-6` (24px from the screen edge), which put the Share button behind/under the translucent bottom tab bar on `/feed` — only visible because a screenshot showed it clipped. Repositioned to clear `env(safe-area-inset-bottom) + 84px` (the tab bar's height), verified visually that all three actions now sit clearly above the bar.
 - Achievements/actions verified with Playwright interaction tests (not just screenshots): like toggle changes count and fill, comment mention renders correctly.
 
-## v1 scope cut: Chat removed
+## v1 scope cut: Chat removed, then restored
 
-Per explicit request, Chat is out of v1 — the app is Reels + Profile only. Deleted `app/(app)/chat/` entirely (inbox, thread view, per-thread read state), dropped the tab from `TabBar.tsx` (now 2 tabs), removed the now-dead `/chat/[id]` links from Profile's friends list (plain rows now, not navigable), and cleaned the now-unused chat types/mock-data/storage helpers (`ChatMessage`, `ChatFilter`, `mockChatThreads`, `mockLastMessage`, `mockInitiallyUnread`, `getReadThreadIds`/`markThreadRead`). Nothing chat-related was left half-wired.
+Chat was cut for v1, then explicitly brought back — restored `app/(app)/chat/` from git history (the commit right before removal), which already had the light/dark theming and Primary/Unread/Read filter applied, so no rework needed there. `TabBar.tsx` is back to 3 tabs, and Profile's friends list links into `/chat/[id]` again.
+
+## Real video sharing in chat
+
+Share (from the per-video action rail) now actually delivers into the recipient's chat thread instead of just showing a confirmation toast:
+
+- `lib/types.ts`: `ChatMessage` gained an optional `sharedVideo: SharedVideoAttachment` field (`videoId`, `platform`, `originalUrl`, `creatorHandle`).
+- `lib/storage.ts`: new `getSentMessages()` / `sendMessageToFriend()`, same localStorage-backed pattern as everything else (per-browser only — still no backend, see the earlier note on `lib/storage.ts`).
+- `components/feed/VideoActions.tsx`'s `handleShare` looks up the video being shared in `mockVideos` and, if found, calls `sendMessageToFriend` with the attachment before showing the existing "Sent to X" confirmation. (The top-bar `StreakBar` share stays as-is — it's not tied to a specific video, so there's nothing to attach.)
+- `app/(app)/chat/[friendId]/page.tsx` merges `getSentMessages()[friendId]` after the seed messages on mount, and renders `sharedVideo` messages as a distinct card (platform icon, creator handle, "Tap to watch" linking to the original URL) instead of a plain text bubble.
+- `app/(app)/chat/page.tsx`'s inbox preview also checks for sent messages and shows "You shared a video" as the latest preview when present, overriding the static seed text.
+
+Verified the full loop with Playwright **in a single browser session** (an earlier attempt across two separate script invocations wrongly looked broken — each `chromium.launch()` is a fresh profile, so localStorage doesn't carry over between separate test runs, which is a test-methodology gotcha, not an app bug): shared a video from Reels → chat inbox showed "You shared a video" for that friend → opening the thread showed a real "SHARED A VIDEO" card with the correct creator handle and a working "Tap to watch" link.
 
 ## LaTeX rendering (KaTeX)
 

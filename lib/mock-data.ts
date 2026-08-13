@@ -1,4 +1,12 @@
-import type { Achievement, Friend, QuizCardData, UserProfile, VideoComment, VideoItem } from "./types";
+import type {
+  Achievement,
+  ChatMessage,
+  Friend,
+  QuizCardData,
+  UserProfile,
+  VideoComment,
+  VideoItem,
+} from "./types";
 
 export const mockVideos: VideoItem[] = [
   {
@@ -72,6 +80,32 @@ export const mockQuizzes: QuizCardData[] = [
     correct_index: 1,
   },
 ];
+
+export const mockChatThreads: Record<string, ChatMessage[]> = {
+  f1: [
+    { id: "m1", fromMe: false, text: "yo did you see this derivative trick", time: "9:41 AM" },
+    { id: "m2", fromMe: true, text: "sending it back to you rn", time: "9:42 AM" },
+    { id: "m3", fromMe: false, text: "streak's at 12, don't break it 🔥", time: "9:43 AM" },
+  ],
+  f2: [
+    { id: "m1", fromMe: false, text: "that quiz card destroyed me", time: "Yesterday" },
+    { id: "m2", fromMe: true, text: "same, got the integral one wrong lol", time: "Yesterday" },
+  ],
+  f3: [
+    { id: "m1", fromMe: true, text: "21 day streak let's go", time: "Mon" },
+    { id: "m2", fromMe: false, text: "not losing to you, sending 3 more", time: "Mon" },
+  ],
+};
+
+export const mockLastMessage: Record<string, string> = {
+  f1: "streak's at 12, don't break it 🔥",
+  f2: "same, got the integral one wrong lol",
+  f3: "not losing to you, sending 3 more",
+};
+
+// Seed unread state for the demo — overridden by lib/storage.ts once a
+// thread has actually been opened.
+export const mockInitiallyUnread = new Set(["f1", "f2"]);
 
 export const mockProfile: UserProfile = {
   name: "You",

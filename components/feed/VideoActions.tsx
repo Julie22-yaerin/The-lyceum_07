@@ -4,14 +4,15 @@ import { useEffect, useState } from "react";
 import CommentSheet from "@/components/feed/CommentSheet";
 import ShareDrawer from "@/components/social/ShareDrawer";
 import { ChatIcon, HeartIcon, ShareIcon } from "@/components/icons";
-import { mockComments, mockFriends, mockLikeCounts } from "@/lib/mock-data";
+import { mockComments, mockFriends, mockLikeCounts, mockVideos } from "@/lib/mock-data";
 import {
   addStoredComment,
   getLikedVideoIds,
   getStoredComments,
+  sendMessageToFriend,
   setVideoLiked,
 } from "@/lib/storage";
-import type { VideoComment } from "@/lib/types";
+import type { ChatMessage, VideoComment } from "@/lib/types";
 
 interface VideoActionsProps {
   videoId: string;
@@ -63,11 +64,28 @@ export default function VideoActions({ videoId }: VideoActionsProps) {
 
   const handleShare = (friendId: string) => {
     const friend = mockFriends.find((f) => f.id === friendId);
+    const video = mockVideos.find((v) => v.id === videoId);
     setIsShareOpen(false);
-    if (friend) {
-      setShareConfirmation(`Sent to ${friend.name}`);
-      setTimeout(() => setShareConfirmation(null), 2000);
+    if (!friend) return;
+
+    if (video) {
+      const message: ChatMessage = {
+        id: `share-${Date.now()}`,
+        fromMe: true,
+        text: "Shared a video",
+        time: "Now",
+        sharedVideo: {
+          videoId: video.id,
+          platform: video.platform,
+          originalUrl: video.original_url,
+          creatorHandle: video.creator_handle,
+        },
+      };
+      sendMessageToFriend(friendId, message);
     }
+
+    setShareConfirmation(`Sent to ${friend.name}`);
+    setTimeout(() => setShareConfirmation(null), 2000);
   };
 
   return (
