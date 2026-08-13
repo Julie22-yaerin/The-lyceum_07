@@ -238,4 +238,9 @@ Implement the Production Media Engine using Microlink API for video extraction. 
 | A | `app/api/v1/media/resolve/route.ts` | ✅ Implemented |
 | B | `components/player/UniversalPlayer.tsx` | ✅ Implemented |
 | C | `components/feed/FeedScroll.tsx` | ✅ Implemented |
-| D | `components/social/StreakBar.tsx` | ⏳ Pending |
+| D | `components/social/StreakBar.tsx` | ✅ Implemented |
+| — | `supabase/migrations/0001_init_schema.sql` | ✅ Implemented |
+
+### Notes
+- StreakBar/ShareDrawer currently run on local component state (mock friends). Wiring them to real `friendships` / `direct_messages` tables needs a configured Supabase project (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) — not available in this environment.
+- Video playback testing (real TikTok/IG/X/YouTube URLs against the Microlink API) is deferred per user request.

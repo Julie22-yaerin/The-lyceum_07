@@ -1,6 +1,6 @@
-import FeedScroll from "@/components/feed/FeedScroll";
-import { mockQuizzes, mockVideos } from "@/lib/mock-data";
+import HomeClient from "@/app/home-client";
+import { mockFriends, mockQuizzes, mockVideos } from "@/lib/mock-data";
 
 export default function Home() {
-  return <FeedScroll videos={mockVideos} quizzes={mockQuizzes} />;
+  return <HomeClient videos={mockVideos} quizzes={mockQuizzes} friends={mockFriends} />;
 }

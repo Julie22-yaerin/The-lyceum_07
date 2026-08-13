@@ -65,3 +65,10 @@ export interface QuizCardData {
 export type FeedSlide =
   | { kind: "video"; id: string; data: VideoItem }
   | { kind: "quiz"; id: string; data: QuizCardData };
+
+export interface Friend {
+  id: string;
+  name: string;
+  avatar_url?: string | null;
+  streak_count: number;
+}

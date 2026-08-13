@@ -1,4 +1,4 @@
-import type { QuizCardData, VideoItem } from "./types";
+import type { Friend, QuizCardData, VideoItem } from "./types";
 
 export const mockVideos: VideoItem[] = [
   {
@@ -41,6 +41,12 @@ export const mockVideos: VideoItem[] = [
     creator_handle: "@funny_clips",
     duration_seconds: 15,
   },
+];
+
+export const mockFriends: Friend[] = [
+  { id: "f1", name: "Minh", streak_count: 12 },
+  { id: "f2", name: "Lan", streak_count: 5 },
+  { id: "f3", name: "Khoa", streak_count: 21 },
 ];
 
 export const mockQuizzes: QuizCardData[] = [
