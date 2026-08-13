@@ -161,3 +161,12 @@ export function CameraIcon(props: IconProps) {
     </svg>
   );
 }
+
+export function SparkleIcon(props: IconProps) {
+  return (
+    <svg {...baseProps(props)}>
+      <path d="M12 3.5c.6 3.2 1.7 4.3 4.9 4.9-3.2.6-4.3 1.7-4.9 4.9-.6-3.2-1.7-4.3-4.9-4.9 3.2-.6 4.3-1.7 4.9-4.9z" />
+      <path d="M18.5 14c.35 1.9 1 2.55 2.9 2.9-1.9.35-2.55 1-2.9 2.9-.35-1.9-1-2.55-2.9-2.9 1.9-.35 2.55-1 2.9-2.9z" />
+    </svg>
+  );
+}

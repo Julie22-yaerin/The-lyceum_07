@@ -1,7 +1,6 @@
 import type { UserProfile, VideoComment } from "./types";
 
 const PROFILE_KEY = "lyceum-profile";
-const READ_THREADS_KEY = "lyceum-read-threads";
 const LIKED_VIDEOS_KEY = "lyceum-liked-videos";
 const COMMENTS_KEY = "lyceum-comments";
 
@@ -29,18 +28,6 @@ export function getStoredProfile(): Partial<UserProfile> | null {
 
 export function saveStoredProfile(profile: UserProfile): void {
   writeJSON(PROFILE_KEY, profile);
-}
-
-// ── Chat read/unread state ────────────────────────────────────────────
-export function getReadThreadIds(): Set<string> {
-  return new Set(readJSON<string[]>(READ_THREADS_KEY) ?? []);
-}
-
-export function markThreadRead(friendId: string): void {
-  const ids = getReadThreadIds();
-  if (ids.has(friendId)) return;
-  ids.add(friendId);
-  writeJSON(READ_THREADS_KEY, Array.from(ids));
 }
 
 // ── Reels likes ────────────────────────────────────────────────────────

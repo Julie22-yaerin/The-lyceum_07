@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { CheckIcon, XIcon } from "@/components/icons";
+import MathText from "@/components/MathText";
 import type { QuizCardData } from "@/lib/types";
 
 interface QuizCardProps {
@@ -25,7 +26,7 @@ export default function QuizCard({ quiz }: QuizCardProps) {
       </span>
 
       <p className="max-w-[360px] text-balance text-center text-[clamp(20px,3.4vw,26px)] font-bold leading-[1.25] tracking-[-0.02em] text-text">
-        {quiz.question}
+        <MathText text={quiz.question} />
       </p>
 
       <div className="w-full max-w-[400px] overflow-hidden rounded-panel bg-surface shadow-panel">
@@ -48,7 +49,7 @@ export default function QuizCard({ quiz }: QuizCardProps) {
                 showCorrect ? "bg-surface-2 text-text" : ""
               } ${showWrong ? "bg-surface-2 text-text" : ""} ${dimmed ? "text-text-3" : ""}`}
             >
-              <span>{option}</span>
+              <MathText text={option} />
               {showCorrect && <CheckIcon width={18} height={18} className="shrink-0 text-live" />}
               {showWrong && <XIcon width={18} height={18} className="shrink-0 text-danger" />}
             </button>

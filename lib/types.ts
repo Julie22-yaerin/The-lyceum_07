@@ -64,20 +64,14 @@ export interface QuizCardData {
 
 export type FeedSlide =
   | { kind: "video"; id: string; data: VideoItem }
-  | { kind: "quiz"; id: string; data: QuizCardData };
+  | { kind: "quiz"; id: string; data: QuizCardData }
+  | { kind: "meme"; id: string; data: { topic: string } };
 
 export interface Friend {
   id: string;
   name: string;
   avatar_url?: string | null;
   streak_count: number;
-}
-
-export interface ChatMessage {
-  id: string;
-  fromMe: boolean;
-  text: string;
-  time: string;
 }
 
 export const AVATAR_COLORS = [
@@ -116,4 +110,8 @@ export interface VideoComment {
   createdAt: string;
 }
 
-export type ChatFilter = "primary" | "unread" | "read";
+export interface FeedSlideContext {
+  kind: "video" | "quiz" | "meme";
+  topic: string;
+  detail: string;
+}

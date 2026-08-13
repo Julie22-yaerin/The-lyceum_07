@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { AwardIcon, ChevronRightIcon, CopyIcon, FlameIcon } from "@/components/icons";
+import { AwardIcon, CopyIcon, FlameIcon } from "@/components/icons";
 import ThemeToggle from "@/components/ThemeToggle";
 import { mockAchievements, mockFriends, mockProfile } from "@/lib/mock-data";
 import { getStoredProfile } from "@/lib/storage";
@@ -144,10 +144,9 @@ export default function ProfilePage() {
         {/* Friends list */}
         <div className="mt-5 overflow-hidden rounded-panel bg-surface shadow-panel">
           {mockFriends.map((friend, index) => (
-            <Link
+            <div
               key={friend.id}
-              href={`/chat/${friend.id}`}
-              className={`flex min-h-[60px] items-center gap-3 px-4 py-3 transition-colors duration-150 active:bg-surface-2 ${
+              className={`flex min-h-[60px] items-center gap-3 px-4 py-3 ${
                 index > 0 ? "border-t border-hairline" : ""
               }`}
             >
@@ -159,8 +158,7 @@ export default function ProfilePage() {
                 <FlameIcon width={13} height={13} className="text-accent" />
                 {friend.streak_count}
               </span>
-              <ChevronRightIcon width={18} height={18} className="shrink-0 text-text-4" />
-            </Link>
+            </div>
           ))}
         </div>
 
