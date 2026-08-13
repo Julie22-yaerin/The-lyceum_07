@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function LandingNav() {
   const [scrolled, setScrolled] = useState(false);
@@ -23,12 +24,15 @@ export default function LandingNav() {
         <Link href="/" className="text-[15px] font-semibold tracking-[-0.01em] text-text">
           The Lyceum
         </Link>
-        <Link
-          href="/feed"
-          className="flex h-9 items-center rounded-pill bg-white/[0.06] px-4 text-[13px] font-medium text-text transition-colors duration-150 hover:bg-white/[0.1]"
-        >
-          Open the feed
-        </Link>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <Link
+            href="/feed"
+            className="flex h-9 items-center rounded-pill bg-surface-3 px-4 text-[13px] font-medium text-text transition-colors duration-150 hover:bg-surface-2"
+          >
+            Open the feed
+          </Link>
+        </div>
       </div>
     </header>
   );

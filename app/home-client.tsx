@@ -25,7 +25,9 @@ export default function HomeClient({ videos, quizzes, friends: initialFriends }:
   };
 
   return (
-    <div className="relative h-screen w-full bg-bg">
+    // Reels stays dark regardless of the app-wide theme toggle — same as
+    // IG/TikTok, whose video-viewing screen never follows system light mode.
+    <div className="relative h-screen w-full bg-video" data-theme="dark">
       <StreakBar streakCount={topStreak} friends={friends} onShare={handleShare} />
       <FeedScroll videos={videos} quizzes={quizzes} />
     </div>

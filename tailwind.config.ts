@@ -10,6 +10,7 @@ const config: Config = {
     extend: {
       colors: {
         bg: "var(--bg)",
+        video: "var(--bg-video)",
         surface: "var(--surface)",
         "surface-2": "var(--surface-2)",
         "surface-3": "var(--surface-3)",

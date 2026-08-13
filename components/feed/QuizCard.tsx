@@ -19,7 +19,7 @@ export default function QuizCard({ quiz }: QuizCardProps) {
   const revealed = selected !== null;
 
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center gap-6 bg-bg px-6">
+    <div className="flex h-full w-full flex-col items-center justify-center gap-6 bg-video px-6">
       <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-text-3">
         Active Recall
       </span>

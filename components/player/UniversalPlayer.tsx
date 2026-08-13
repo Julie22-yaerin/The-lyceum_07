@@ -68,7 +68,7 @@ export default function UniversalPlayer({
 
   return (
     <div
-      className={`relative h-full w-full overflow-hidden bg-bg ${className}`}
+      className={`relative h-full w-full overflow-hidden bg-video ${className}`}
       style={{ touchAction: "pan-y" }}
       onClick={toggleMute}
     >

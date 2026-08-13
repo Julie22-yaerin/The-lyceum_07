@@ -3,29 +3,36 @@
 @tailwind utilities;
 
 /* ════════════════════════════════════════════════════════════════
-   AlgoScroll — Apple Liquid Glass tokens (dark-grey ground, light-blue accent)
-   Adapted from the Apple Liquid Glass design skill for a full-bleed,
-   video-first dark surface: pure-black video canvas, dark-grey app
-   chrome (sheets/panels/nav), one light-blue accent.
+   The Lyceum — Apple Liquid Glass tokens, light + dark
+   Light is the base (Apple's canonical grey-white ground); dark
+   overrides via [data-theme="dark"] — set on <html> by the theme
+   toggle, or on a nested wrapper to force a subtree dark regardless
+   of the page-level theme (used by the always-dark Reels screen).
+   --bg-video never changes: it's the video canvas, not app chrome.
    ════════════════════════════════════════════════════════════════ */
 :root {
-  /* Neutrals — the interface skeleton */
-  --bg: #000000; /* video canvas / page ground */
-  --surface: #1c1c1e; /* elevated dark-grey surface — sheets, panels */
-  --surface-2: #2c2c2e; /* row hover / pressed */
-  --surface-3: #3a3a3c; /* tracks, subtle fills */
-  --text: #f5f5f7; /* primary text — cool near-white */
-  --text-2: rgba(245, 245, 247, 0.7); /* secondary / meta */
-  --text-3: rgba(245, 245, 247, 0.45); /* tertiary / caption */
-  --text-4: rgba(245, 245, 247, 0.28); /* placeholder / quaternary */
-  --faint: rgba(245, 245, 247, 0.18); /* grab handles, faint marks */
-  --hairline: rgba(255, 255, 255, 0.12); /* divider on dark surfaces */
+  /* Neutrals — the interface skeleton (light, default) */
+  --bg: #f5f5f7;
+  --surface: #ffffff;
+  --surface-2: #fbfbfd; /* row hover / pressed */
+  --surface-3: #e8e8ed; /* tracks, subtle fills */
+  --text: #1d1d1f;
+  --text-2: #6e6e73;
+  --text-3: #86868b;
+  --text-4: #aeaeb2;
+  --faint: #d2d2d7;
+  --hairline: rgba(0, 0, 0, 0.07);
+  --hairline-strong: rgba(0, 0, 0, 0.35);
+  --glass-nav-bg: rgba(245, 245, 247, 0.72);
 
   /* Accent — emphasis only, everything else stays grayscale */
-  --accent: #5ac8fa; /* light blue — primary action / focus */
-  --accent-strong: #0a84ff; /* deeper blue for small text-on-light contexts */
-  --live: #30d158; /* correct / online */
-  --danger: #ff453a; /* incorrect */
+  --accent: #0071e3; /* light blue-on-white needs a deeper blue for contrast */
+  --accent-strong: #0071e3;
+  --live: #30d158;
+  --danger: #ff3b30;
+
+  /* Video canvas — always black, independent of theme */
+  --bg-video: #000000;
 
   /* Radius tiers — semantic, never ad-hoc */
   --r-pill: 999px;
@@ -36,9 +43,9 @@
   --r-panel: 22px;
   --r-hero: 26px;
 
-  /* Shadow — two-layer; on a black canvas elevation reads mostly via tone + hairline */
-  --sh-panel: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.35);
-  --sh-overlay: 0 2px 8px rgba(0, 0, 0, 0.35), 0 -20px 60px rgba(0, 0, 0, 0.45);
+  /* Shadow — two-layer */
+  --sh-panel: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.05);
+  --sh-overlay: 0 2px 8px rgba(0, 0, 0, 0.1), 0 30px 80px rgba(0, 0, 0, 0.24);
 
   /* Type */
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
@@ -47,6 +54,44 @@
   /* Motion — spring-like easing (see motion.md decisions) */
   --ease-spring: cubic-bezier(0.32, 0.72, 0, 1); /* enter: sheets/dialogs (~400ms) */
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1); /* small moves (~200ms) */
+}
+
+[data-theme="light"] {
+  --bg: #f5f5f7;
+  --surface: #ffffff;
+  --surface-2: #fbfbfd;
+  --surface-3: #e8e8ed;
+  --text: #1d1d1f;
+  --text-2: #6e6e73;
+  --text-3: #86868b;
+  --text-4: #aeaeb2;
+  --faint: #d2d2d7;
+  --hairline: rgba(0, 0, 0, 0.07);
+  --hairline-strong: rgba(0, 0, 0, 0.35);
+  --glass-nav-bg: rgba(245, 245, 247, 0.72);
+  --accent: #0071e3;
+  --accent-strong: #0071e3;
+  --sh-panel: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.05);
+  --sh-overlay: 0 2px 8px rgba(0, 0, 0, 0.1), 0 30px 80px rgba(0, 0, 0, 0.24);
+}
+
+[data-theme="dark"] {
+  --bg: #000000;
+  --surface: #1c1c1e;
+  --surface-2: #2c2c2e;
+  --surface-3: #3a3a3c;
+  --text: #f5f5f7;
+  --text-2: rgba(245, 245, 247, 0.7);
+  --text-3: rgba(245, 245, 247, 0.45);
+  --text-4: rgba(245, 245, 247, 0.28);
+  --faint: rgba(245, 245, 247, 0.18);
+  --hairline: rgba(255, 255, 255, 0.12);
+  --hairline-strong: rgba(255, 255, 255, 0.35);
+  --glass-nav-bg: rgba(28, 28, 30, 0.72);
+  --accent: #5ac8fa;
+  --accent-strong: #0a84ff;
+  --sh-panel: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px rgba(0, 0, 0, 0.35);
+  --sh-overlay: 0 2px 8px rgba(0, 0, 0, 0.35), 0 -20px 60px rgba(0, 0, 0, 0.45);
 }
 
 * {
@@ -63,6 +108,7 @@ body {
   font-family: var(--font);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 @layer utilities {
@@ -76,7 +122,7 @@ body {
 
 /* Liquid-glass frost — ONLY on the sticky top overlay / bottom sheet */
 .glass-nav {
-  background: rgba(28, 28, 30, 0.72);
+  background: var(--glass-nav-bg);
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
 }
@@ -105,7 +151,7 @@ body {
 @media (prefers-contrast: more) {
   .glass-nav {
     background: var(--surface);
-    border-color: rgba(255, 255, 255, 0.35);
+    border-color: var(--hairline-strong);
   }
 }
 

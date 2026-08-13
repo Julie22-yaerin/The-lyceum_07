@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ChevronRightIcon, CopyIcon, FlameIcon } from "@/components/icons";
+import ThemeToggle from "@/components/ThemeToggle";
 import { mockFriends, mockProfile } from "@/lib/mock-data";
 
 export default function ProfilePage() {
@@ -89,7 +90,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Friends list */}
-        <div className="mb-6 mt-5 overflow-hidden rounded-panel bg-surface shadow-panel">
+        <div className="mt-5 overflow-hidden rounded-panel bg-surface shadow-panel">
           {mockFriends.map((friend, index) => (
             <Link
               key={friend.id}
@@ -109,6 +110,14 @@ export default function ProfilePage() {
               <ChevronRightIcon width={18} height={18} className="shrink-0 text-text-4" />
             </Link>
           ))}
+        </div>
+
+        {/* Appearance */}
+        <div className="mb-6 mt-5 overflow-hidden rounded-panel bg-surface shadow-panel">
+          <div className="flex min-h-[56px] items-center justify-between px-4 py-3">
+            <span className="text-[15px] font-medium text-text">Appearance</span>
+            <ThemeToggle className="bg-surface-3" />
+          </div>
         </div>
       </div>
     </div>

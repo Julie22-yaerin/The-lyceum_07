@@ -69,7 +69,7 @@ export default function VideoSlide({ video, isActive, shouldRender }: VideoSlide
 
   if (!shouldRender) {
     return (
-      <div className="h-full w-full bg-bg">
+      <div className="h-full w-full bg-video">
         {video.thumbnail_url && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -85,7 +85,7 @@ export default function VideoSlide({ video, isActive, shouldRender }: VideoSlide
 
   if (error) {
     return (
-      <div className="flex h-full w-full items-center justify-center bg-bg text-[14px] text-text-3">
+      <div className="flex h-full w-full items-center justify-center bg-video text-[14px] text-text-3">
         Video unavailable
       </div>
     );
@@ -93,7 +93,7 @@ export default function VideoSlide({ video, isActive, shouldRender }: VideoSlide
 
   if (!resolved) {
     return (
-      <div className="relative h-full w-full bg-bg">
+      <div className="relative h-full w-full bg-video">
         {video.thumbnail_url && (
           // eslint-disable-next-line @next/next/no-img-element
           <img

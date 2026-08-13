@@ -60,7 +60,7 @@ export default function Home() {
           </Link>
           <a
             href="#how-it-works"
-            className="flex h-11 items-center rounded-pill border border-hairline px-5 text-[14px] font-medium text-text-2 transition-colors duration-150 hover:bg-white/[0.05]"
+            className="flex h-11 items-center rounded-pill border border-hairline px-5 text-[14px] font-medium text-text-2 transition-colors duration-150 hover:bg-surface-2"
           >
             See how it works
           </a>
