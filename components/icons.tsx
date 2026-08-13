@@ -48,3 +48,73 @@ export function XIcon(props: IconProps) {
     </svg>
   );
 }
+
+export function ReelsIcon(props: IconProps) {
+  return (
+    <svg {...baseProps(props)}>
+      <rect x="2.5" y="5" width="19" height="14" rx="3" />
+      <path d="M9.5 9v6l5-3-5-3z" />
+    </svg>
+  );
+}
+
+export function ChatIcon(props: IconProps) {
+  return (
+    <svg {...baseProps(props)}>
+      <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v7A2.5 2.5 0 0 1 17.5 15H10l-4.5 4v-4H6.5A2.5 2.5 0 0 1 4 12.5v-7z" />
+    </svg>
+  );
+}
+
+export function UserIcon(props: IconProps) {
+  return (
+    <svg {...baseProps(props)}>
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 20a8 8 0 0 1 16 0" />
+    </svg>
+  );
+}
+
+export function LinkIcon(props: IconProps) {
+  return (
+    <svg {...baseProps(props)}>
+      <path d="M9.5 14.5 14.5 9.5" />
+      <path d="M11 6.5 12.5 5A3.54 3.54 0 0 1 17.5 10l-1.5 1.5" />
+      <path d="M13 17.5 11.5 19A3.54 3.54 0 0 1 6.5 14l1.5-1.5" />
+    </svg>
+  );
+}
+
+export function CopyIcon(props: IconProps) {
+  return (
+    <svg {...baseProps(props)}>
+      <rect x="8.5" y="8.5" width="12" height="12" rx="2.5" />
+      <path d="M15.5 8.5V6A2.5 2.5 0 0 0 13 3.5H6A2.5 2.5 0 0 0 3.5 6v7A2.5 2.5 0 0 0 6 15.5h2.5" />
+    </svg>
+  );
+}
+
+export function ChevronRightIcon(props: IconProps) {
+  return (
+    <svg {...baseProps(props)}>
+      <path d="M9 6l6 6-6 6" />
+    </svg>
+  );
+}
+
+export function SendIcon(props: IconProps) {
+  return (
+    <svg {...baseProps(props)}>
+      <path d="M4.5 12 20 4.5 15 19.5l-4-6.5-6.5-1z" />
+    </svg>
+  );
+}
+
+export function ArrowLeftIcon(props: IconProps) {
+  return (
+    <svg {...baseProps(props)}>
+      <path d="M19 12H5" />
+      <path d="M12 19l-7-7 7-7" />
+    </svg>
+  );
+}

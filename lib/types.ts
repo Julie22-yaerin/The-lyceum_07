@@ -72,3 +72,16 @@ export interface Friend {
   avatar_url?: string | null;
   streak_count: number;
 }
+
+export interface ChatMessage {
+  id: string;
+  fromMe: boolean;
+  text: string;
+  time: string;
+}
+
+export interface UserProfile {
+  name: string;
+  handle: string;
+  referralCode: string;
+}

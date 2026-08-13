@@ -267,7 +267,7 @@ Redesigned the app chrome (not the video canvas) using the Apple Liquid Glass de
 ## Landing Page — "The Lyceum"
 
 - New root route `app/page.tsx`: Apple Liquid Glass marketing page positioning **The Lyceum — the unfair advantage for laziness**. Glass sticky nav (`components/marketing/LandingNav.tsx`, scroll-edge hairline), hero, a unified "How it works" panel (3 rows, hairline-divided — not fragmented cards), an independent feature-card grid, a blue gradient CTA with light orbs (glass-on-color, still one accent hue), and a plain footer.
-- The actual product feed moved from `/` to `/feed` (`app/feed/page.tsx`) so `/` is a proper landing page and `/feed` is the app.
+- The actual product feed moved from `/` to `/feed` (`app/(app)/feed/page.tsx`) so `/` is a proper landing page and `/feed` is the app.
 - Verified with `tsc`/`lint`/`build` and Playwright screenshots at desktop (1280px) and mobile (390px) widths.
 
 ## Fetching providers — Iframely + OpenRouter wired in
@@ -286,3 +286,18 @@ The user provided 1 Iframely key and 3 OpenRouter keys directly in chat. **These
 - `POST /api/v1/ai/generate-quiz` → `{"success":false,"error":"OpenRouter key rejected (403)"}` after trying all 3 keys in order (confirms the fallback loop itself works).
 
 Real video fetch / AI generation needs to be tested somewhere with open egress — e.g. the deployed Railway instance, or the user's own machine.
+
+**Update**: re-tested again via a second, independent tool (WebFetch, which runs outside this session's local Bash proxy) — still `EGRESS_BLOCKED` for `iframe.ly`. This confirms the block is a network policy on the **environment** itself (set when the Claude Code on the web environment was created), not something fixable from inside a session. To actually fetch live video, switch the environment's network policy to allow general internet access (environment settings), then re-run — or test against the deployed Railway instance / a local machine, neither of which sits behind this policy.
+
+## IG-style app shell — Reels / Chat / Profile + invite links
+
+Restructured the product into three tab-barred sections, Instagram-style:
+
+- `components/nav/TabBar.tsx`: fixed glass bottom tab bar (Reels / Chat / Profile), one accent active tab, real line icons — hidden on an open chat thread (`/chat/[id]`) since that view has its own message-input bar, matching how IG hides its tab bar in a DM thread.
+- Routes moved under a shared `app/(app)/layout.tsx` route group so all three tabs render inside the same shell: `/feed` (existing reels), `/chat` (new), `/profile` (new). URLs are unchanged by the route group.
+- **Chat** (`app/(app)/chat/page.tsx` + `/chat/[friendId]/page.tsx`): inbox is one unified panel (avatar, name, streak, last-message preview, hairline dividers — not per-row cards); thread view has real message bubbles and a working send box (local component state — not persisted anywhere yet, no backend chat storage exists).
+- **Profile** (`app/(app)/profile/page.tsx`): avatar/handle header, a 3-column stats panel (Friends / Best streak / Reels watched), an **Invite a friend** panel, and a friends list that deep-links into `/chat/[id]`.
+- **Invite link** (`app/invite/[code]/page.tsx`): the actual destination the copied link points to — a standalone landing page with the 40%-off pitch and a "Claim & open the feed" CTA. The link itself and the copy-to-clipboard button are fully real (verified with Playwright: `navigator.clipboard.readText()` returned the correct `origin/invite/<code>` URL after clicking Copy).
+
+### What's real vs. what's still UI-only
+The invite flow's **copy-able link and its landing page are functional**. The **40% discount and "unlock each other's fetched reels" entitlement are not implemented** — there is no auth/user-account system, billing/payment provider, or per-user video-access model anywhere in this project yet, so there's nothing for those to hook into. Building that for real needs product decisions this session doesn't have answers to: which auth provider, which payment processor, and what "their fetched reels" means as a data model (a per-user `videos` visibility flag? a shared pool keyed by referral pair?). Flagging this explicitly rather than faking a working discount.
