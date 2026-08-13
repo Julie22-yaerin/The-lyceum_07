@@ -44,5 +44,29 @@ service cloud.firestore {
         && request.resource.data.mentions is list;
       allow update, delete: if false;
     }
+
+    // resolvedMedia/{key} — server-side cache of resolved video embeds
+    // (lib/media/cache.ts), keyed by a hash of the source URL. Written by
+    // the /api/v1/media/resolve API route using an unauthenticated server
+    // client (no end-user session exists inside a stateless API route), so
+    // this can't require request.auth like the collections above. Treated
+    // like a CDN cache: no user data, no secrets, just "this TikTok URL
+    // resolves to this public embed" — the same information Iframely or
+    // Microlink would hand back to any caller anyway. Shape-validated to
+    // keep out obviously-malformed writes, not to gate on identity.
+    match /resolvedMedia/{key} {
+      allow read: if true;
+      allow create, update: if request.resource.data.player_type in
+          ["iframe", "direct_mp4", "iframe_fallback"];
+      allow delete: if false;
+    }
+
+    // topicQueries/{topic} — caches the AI-picked YouTube search phrase per
+    // study topic (same rationale as resolvedMedia above).
+    match /topicQueries/{topic} {
+      allow read: if true;
+      allow create, update: if request.resource.data.query is string;
+      allow delete: if false;
+    }
   }
 }

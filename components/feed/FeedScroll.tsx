@@ -17,6 +17,11 @@ interface FeedScrollProps {
 // mounted; everything else renders a lightweight thumbnail placeholder.
 const RENDER_WINDOW = 1;
 
+// How many *video* slides beyond the render window to warm the shared
+// media cache for, so they've usually already resolved by the time the
+// user scrolls that far — see lib/media/cache.ts.
+const PREFETCH_AHEAD = 3;
+
 export default function FeedScroll({ videos, quizzes, onActiveSlideChange }: FeedScrollProps) {
   const slides = useMemo(() => {
     const base = buildInterleavedFeed(videos, quizzes);
@@ -52,6 +57,34 @@ export default function FeedScroll({ videos, quizzes, onActiveSlideChange }: Fee
     slideRefs.current.forEach((node) => node && observer.observe(node));
     return () => observer.disconnect();
   }, [slides]);
+
+  const prefetchedUrls = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    const upcoming = slides
+      .slice(activeIndex + RENDER_WINDOW + 1, activeIndex + RENDER_WINDOW + 1 + PREFETCH_AHEAD)
+      .filter((slide) => slide.kind === "video")
+      .map((slide) => slide.data as VideoItem)
+      .filter((video) => !prefetchedUrls.current.has(video.original_url));
+
+    if (upcoming.length === 0) return;
+    upcoming.forEach((video) => prefetchedUrls.current.add(video.original_url));
+
+    fetch("/api/v1/media/resolve/batch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        items: upcoming.map((video) => ({
+          original_url: video.original_url,
+          platform: video.platform,
+          topic: video.topic_id,
+        })),
+      }),
+    }).catch(() => {
+      // Prefetch is a pure optimization — a failure here just means
+      // VideoSlide resolves that video the normal way when it's reached.
+    });
+  }, [activeIndex, slides]);
 
   useEffect(() => {
     if (!onActiveSlideChange) return;

@@ -36,8 +36,7 @@ export default function VideoActions({ videoId }: VideoActionsProps) {
 
   useEffect(() => {
     getLikedVideoIds().then((ids) => setLiked(ids.has(videoId)));
-    getStoredComments().then((all) => {
-      const stored = all[videoId] ?? [];
+    getStoredComments(videoId).then((stored) => {
       if (stored.length) setComments([...seedComments, ...stored]);
     });
     // seedComments intentionally excluded — it's derived fresh from videoId each render

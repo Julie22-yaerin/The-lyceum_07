@@ -43,6 +43,18 @@ export type ResolveResponse =
   | ResolveSuccessFallback
   | ResolveError;
 
+// Prefetch: resolves several videos in one round trip (concurrently on the
+// server) to warm the shared media cache for slides the user hasn't
+// scrolled to yet, so by the time they get there VideoSlide's own resolve
+// call hits a fast cache read instead of the live-fetch waterfall.
+export interface ResolveBatchRequestBody {
+  items: ResolveRequestBody[];
+}
+
+export interface ResolveBatchResponse {
+  results: ResolveResponse[];
+}
+
 export type ContentType = "educational" | "entertainment";
 
 export interface VideoItem {

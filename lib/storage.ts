@@ -5,8 +5,10 @@ import {
   doc,
   getDoc,
   getDocs,
+  query,
   serverTimestamp,
   setDoc,
+  where,
 } from "firebase/firestore";
 import { auth, db } from "./firebase/client";
 import type { ChatMessage, UserProfile, VideoComment } from "./types";
@@ -85,14 +87,12 @@ export async function setVideoLiked(videoId: string, liked: boolean): Promise<vo
 }
 
 // ── Reels comments (shared across everyone, seeded + user-added, per video) ──
-export async function getStoredComments(): Promise<Record<string, VideoComment[]>> {
-  const snap = await getDocs(collection(db, "comments"));
-  const result: Record<string, VideoComment[]> = {};
-  for (const commentDoc of snap.docs) {
-    const comment = commentDoc.data() as VideoComment;
-    (result[comment.videoId] ??= []).push(comment);
-  }
-  return result;
+// Scoped to a single video's comments via a `where` query — a prior version
+// fetched the entire (unbounded, cross-video) comments collection on every
+// video mount, which got slower as more comments piled up.
+export async function getStoredComments(videoId: string): Promise<VideoComment[]> {
+  const snap = await getDocs(query(collection(db, "comments"), where("videoId", "==", videoId)));
+  return snap.docs.map((commentDoc) => commentDoc.data() as VideoComment);
 }
 
 export async function addStoredComment(comment: VideoComment): Promise<void> {

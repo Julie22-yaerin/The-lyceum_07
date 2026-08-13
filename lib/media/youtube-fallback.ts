@@ -1,11 +1,21 @@
 import { chatComplete } from "@/lib/ai/openrouter";
+import { getCachedTopicQuery, setCachedTopicQuery } from "@/lib/media/cache";
 
-/**
- * AI turns a topic id (e.g. "igcse-calculus") into a short, natural
- * YouTube search phrase. Never throws — falls back to the raw topic on
- * any AI failure, which still works fine as a search query.
- */
-async function pickSearchQuery(topic: string): Promise<string> {
+// Free-tier OpenRouter models can be "reasoning" models that spend several
+// seconds generating hidden chain-of-thought before answering even a
+// trivial classification (measured up to ~23s for this exact prompt) — far
+// too slow to block a video load on. The raw topic id is already a decent
+// search phrase on its own, so the AI call is raced against a short
+// timeout: whichever finishes first wins the actual request, and if the AI
+// loses the race it's left running in the background purely to populate
+// the topic-query cache for next time (see getCachedTopicQuery below).
+const AI_QUERY_TIMEOUT_MS = 2500;
+
+function rawTopicQuery(topic: string): string {
+  return topic.replace(/-/g, " ");
+}
+
+async function fetchAiQuery(topic: string): Promise<string | null> {
   try {
     const content = await chatComplete({
       jsonMode: true,
@@ -21,12 +31,30 @@ async function pickSearchQuery(topic: string): Promise<string> {
       ],
     });
     const parsed = JSON.parse(content) as { query?: string };
-    if (parsed.query && parsed.query.trim().length > 0) return parsed.query.trim();
+    return parsed.query?.trim() || null;
   } catch {
-    // AI unavailable or returned junk — the raw topic id is still a
-    // reasonable search query on its own.
+    return null;
   }
-  return topic.replace(/-/g, " ");
+}
+
+/**
+ * Picks a YouTube search phrase for `topic`. Cached per topic (not per
+ * video), so a real AI-picked query only ever needs to win the race once
+ * for a given topic globally — every subsequent call (any video, any user)
+ * gets it back instantly, even across many broken source URLs that share it.
+ */
+async function pickSearchQuery(topic: string): Promise<string> {
+  const cached = await getCachedTopicQuery(topic);
+  if (cached) return cached;
+
+  const aiPromise = fetchAiQuery(topic).then((query) => {
+    if (query) void setCachedTopicQuery(topic, query);
+    return query;
+  });
+
+  const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), AI_QUERY_TIMEOUT_MS));
+  const winner = await Promise.race([aiPromise, timeout]);
+  return winner ?? rawTopicQuery(topic);
 }
 
 /**
