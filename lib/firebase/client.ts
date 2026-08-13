@@ -2,8 +2,8 @@
 
 import { getApps, initializeApp, type FirebaseOptions } from "firebase/app";
 import { getAnalytics, isSupported, type Analytics } from "firebase/analytics";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getAuth, GoogleAuthProvider, type Auth } from "firebase/auth";
+import { getFirestore, type Firestore } from "firebase/firestore";
 
 const firebaseConfig: FirebaseOptions = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -18,9 +18,22 @@ const firebaseConfig: FirebaseOptions = {
 // Next.js hot-reloads client modules — guard against re-initializing.
 export const firebaseApp = getApps().length ? getApps()[0]! : initializeApp(firebaseConfig);
 
-export const auth = getAuth(firebaseApp);
-export const db = getFirestore(firebaseApp);
-export const googleProvider = new GoogleAuthProvider();
+// getAuth/getFirestore validate the config eagerly and throw if the API key
+// is missing — and Next.js prerenders every page (even "use client" ones,
+// since AuthProvider wraps the root layout) on the server during `next
+// build`. A deploy platform with no NEXT_PUBLIC_FIREBASE_* env vars set
+// would crash the entire build. Nothing in this app touches auth/db outside
+// a useEffect or event handler (never during the render pass itself), so
+// it's safe to skip real initialization on the server — these values are
+// never dereferenced there.
+export const auth: Auth =
+  typeof window !== "undefined" ? getAuth(firebaseApp) : (null as unknown as Auth);
+export const db: Firestore =
+  typeof window !== "undefined" ? getFirestore(firebaseApp) : (null as unknown as Firestore);
+export const googleProvider: GoogleAuthProvider =
+  typeof window !== "undefined"
+    ? new GoogleAuthProvider()
+    : (null as unknown as GoogleAuthProvider);
 
 // Analytics needs a real browser (window, IndexedDB) — never on the server,
 // and not every browser context supports it (e.g. some in-app webviews).
