@@ -5,6 +5,9 @@ export type PlayerType = "iframe" | "direct_mp4" | "iframe_fallback";
 export interface ResolveRequestBody {
   original_url: string;
   platform: Platform;
+  // Topic id (e.g. "igcse-calculus") — used to pick a same-topic YouTube
+  // Short when tiktok/instagram don't resolve to a real playable video.
+  topic?: string;
 }
 
 export interface ResolveSuccessIframe {

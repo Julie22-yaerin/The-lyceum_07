@@ -18,7 +18,7 @@ export default function InvitePage({ params }: { params: { code: string } }) {
       </p>
 
       <Link
-        href="/onboarding"
+        href="/login"
         className="mt-7 flex h-11 items-center rounded-pill bg-accent-strong px-6 text-[15px] font-semibold text-white transition-transform duration-100 ease-out active:scale-[0.97]"
       >
         Claim & open the feed

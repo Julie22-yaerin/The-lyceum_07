@@ -1,0 +1,48 @@
+rules_version = '2';
+
+// Deploy with: firebase deploy --only firestore:rules
+// (requires the Firebase CLI + `firebase use pclick-9f190`, which this
+// sandbox doesn't have credentials for — run it from your own machine.)
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // users/{uid} — profile (name, handle, bio, avatarColor, avatarPhoto,
+    // referralCode). Only the account owner can read or write their own doc;
+    // there's no cross-user profile lookup in the app today.
+    match /users/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+
+      // users/{uid}/readThreads/{friendId} — chat read-state, owner only.
+      match /readThreads/{friendId} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
+
+      // users/{uid}/messageThreads/{friendId} — locally-sent chat messages
+      // (incl. shared videos), owner only.
+      match /messageThreads/{friendId} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
+
+      // users/{uid}/likedVideos/{videoId} — Reels like state, owner only.
+      match /likedVideos/{videoId} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
+    }
+
+    // comments/{commentId} — Reels comments, visible to every signed-in
+    // user (like real video comments), but only ever created — never
+    // edited or deleted — and only as the commenter's own authorName.
+    match /comments/{commentId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasAll(["id", "videoId", "authorName", "text", "mentions", "createdAt"])
+        && request.resource.data.id is string
+        && request.resource.data.videoId is string
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 500
+        && request.resource.data.mentions is list;
+      allow update, delete: if false;
+    }
+  }
+}

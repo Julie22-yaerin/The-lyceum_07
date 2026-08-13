@@ -1,81 +1,100 @@
+import {
+  arrayUnion,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  serverTimestamp,
+  setDoc,
+} from "firebase/firestore";
+import { auth, db } from "./firebase/client";
 import type { ChatMessage, UserProfile, VideoComment } from "./types";
 
-const PROFILE_KEY = "lyceum-profile";
-const READ_THREADS_KEY = "lyceum-read-threads";
-const LIKED_VIDEOS_KEY = "lyceum-liked-videos";
-const COMMENTS_KEY = "lyceum-comments";
-const SENT_MESSAGES_KEY = "lyceum-sent-messages";
-
-function readJSON<T>(key: string): T | null {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T) : null;
-  } catch {
-    return null;
-  }
-}
-
-function writeJSON(key: string, value: unknown): void {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    // Storage can be unavailable (private mode) — state just won't persist.
-  }
+function requireUid(): string | null {
+  return auth.currentUser?.uid ?? null;
 }
 
 // ── Profile (set/edited via onboarding) ──────────────────────────────
-export function getStoredProfile(): Partial<UserProfile> | null {
-  return readJSON<Partial<UserProfile>>(PROFILE_KEY);
+export async function getStoredProfile(): Promise<Partial<UserProfile> | null> {
+  const uid = requireUid();
+  if (!uid) return null;
+  const snap = await getDoc(doc(db, "users", uid));
+  return snap.exists() ? (snap.data() as Partial<UserProfile>) : null;
 }
 
-export function saveStoredProfile(profile: UserProfile): void {
-  writeJSON(PROFILE_KEY, profile);
+export async function saveStoredProfile(profile: UserProfile): Promise<void> {
+  const uid = requireUid();
+  if (!uid) return;
+  await setDoc(doc(db, "users", uid), profile, { merge: true });
 }
 
 // ── Chat read/unread state ────────────────────────────────────────────
-export function getReadThreadIds(): Set<string> {
-  return new Set(readJSON<string[]>(READ_THREADS_KEY) ?? []);
+export async function getReadThreadIds(): Promise<Set<string>> {
+  const uid = requireUid();
+  if (!uid) return new Set();
+  const snap = await getDocs(collection(db, "users", uid, "readThreads"));
+  return new Set(snap.docs.map((d) => d.id));
 }
 
-export function markThreadRead(friendId: string): void {
-  const ids = getReadThreadIds();
-  if (ids.has(friendId)) return;
-  ids.add(friendId);
-  writeJSON(READ_THREADS_KEY, Array.from(ids));
+export async function markThreadRead(friendId: string): Promise<void> {
+  const uid = requireUid();
+  if (!uid) return;
+  await setDoc(doc(db, "users", uid, "readThreads", friendId), { readAt: serverTimestamp() });
 }
 
 // ── Chat messages sent from the Share action (video shares, per friend) ──
-export function getSentMessages(): Record<string, ChatMessage[]> {
-  return readJSON<Record<string, ChatMessage[]>>(SENT_MESSAGES_KEY) ?? {};
+export async function getSentMessages(): Promise<Record<string, ChatMessage[]>> {
+  const uid = requireUid();
+  if (!uid) return {};
+  const snap = await getDocs(collection(db, "users", uid, "messageThreads"));
+  const result: Record<string, ChatMessage[]> = {};
+  for (const threadDoc of snap.docs) {
+    result[threadDoc.id] = (threadDoc.data().items as ChatMessage[]) ?? [];
+  }
+  return result;
 }
 
-export function sendMessageToFriend(friendId: string, message: ChatMessage): void {
-  const all = getSentMessages();
-  const existing = all[friendId] ?? [];
-  all[friendId] = [...existing, message];
-  writeJSON(SENT_MESSAGES_KEY, all);
+export async function sendMessageToFriend(friendId: string, message: ChatMessage): Promise<void> {
+  const uid = requireUid();
+  if (!uid) return;
+  await setDoc(
+    doc(db, "users", uid, "messageThreads", friendId),
+    { items: arrayUnion(message) },
+    { merge: true }
+  );
 }
 
 // ── Reels likes ────────────────────────────────────────────────────────
-export function getLikedVideoIds(): Set<string> {
-  return new Set(readJSON<string[]>(LIKED_VIDEOS_KEY) ?? []);
+export async function getLikedVideoIds(): Promise<Set<string>> {
+  const uid = requireUid();
+  if (!uid) return new Set();
+  const snap = await getDocs(collection(db, "users", uid, "likedVideos"));
+  return new Set(snap.docs.map((d) => d.id));
 }
 
-export function setVideoLiked(videoId: string, liked: boolean): void {
-  const ids = getLikedVideoIds();
-  if (liked) ids.add(videoId);
-  else ids.delete(videoId);
-  writeJSON(LIKED_VIDEOS_KEY, Array.from(ids));
+export async function setVideoLiked(videoId: string, liked: boolean): Promise<void> {
+  const uid = requireUid();
+  if (!uid) return;
+  const ref = doc(db, "users", uid, "likedVideos", videoId);
+  if (liked) {
+    await setDoc(ref, { likedAt: serverTimestamp() });
+  } else {
+    await deleteDoc(ref);
+  }
 }
 
-// ── Reels comments (seeded + user-added, per video) ────────────────────
-export function getStoredComments(): Record<string, VideoComment[]> {
-  return readJSON<Record<string, VideoComment[]>>(COMMENTS_KEY) ?? {};
+// ── Reels comments (shared across everyone, seeded + user-added, per video) ──
+export async function getStoredComments(): Promise<Record<string, VideoComment[]>> {
+  const snap = await getDocs(collection(db, "comments"));
+  const result: Record<string, VideoComment[]> = {};
+  for (const commentDoc of snap.docs) {
+    const comment = commentDoc.data() as VideoComment;
+    (result[comment.videoId] ??= []).push(comment);
+  }
+  return result;
 }
 
-export function addStoredComment(comment: VideoComment): void {
-  const all = getStoredComments();
-  const existing = all[comment.videoId] ?? [];
-  all[comment.videoId] = [...existing, comment];
-  writeJSON(COMMENTS_KEY, all);
+export async function addStoredComment(comment: VideoComment): Promise<void> {
+  await setDoc(doc(db, "comments", comment.id), comment);
 }

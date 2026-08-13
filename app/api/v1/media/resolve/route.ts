@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { resolveWithIframely } from "@/lib/media/iframely";
+import { resolveTopicYouTubeShort } from "@/lib/media/youtube-fallback";
 import type { Platform, ResolveRequestBody, ResolveResponse } from "@/lib/types";
 
 const ALLOWED_PLATFORMS: readonly Platform[] = [
@@ -27,7 +28,7 @@ function extractYouTubeVideoId(url: string): string | null {
 export async function POST(req: Request): Promise<NextResponse<ResolveResponse>> {
   try {
     const body = (await req.json()) as Partial<ResolveRequestBody>;
-    const { original_url, platform } = body;
+    const { original_url, platform, topic } = body;
 
     if (!isValidHttpUrl(original_url) || !platform || !ALLOWED_PLATFORMS.includes(platform)) {
       return NextResponse.json(
@@ -51,58 +52,66 @@ export async function POST(req: Request): Promise<NextResponse<ResolveResponse>>
 
     // 2. TikTok / Instagram / X Strategy — Iframely first, Microlink as fallback
     const iframelyResult = await resolveWithIframely(original_url);
-    if (iframelyResult) {
-      if (iframelyResult.playerType === "direct_mp4" && iframelyResult.streamUrl) {
-        return NextResponse.json({
-          success: true,
-          player_type: "direct_mp4",
-          stream_url: iframelyResult.streamUrl,
-          thumbnail: iframelyResult.thumbnail,
-          duration: iframelyResult.duration,
-          creator: iframelyResult.creator,
-        });
-      }
-      if (iframelyResult.playerType === "iframe" && iframelyResult.embedUrl) {
-        return NextResponse.json({
-          success: true,
-          player_type: "iframe",
-          embed_url: iframelyResult.embedUrl,
-        });
-      }
-      if (iframelyResult.playerType === "iframe_fallback" && iframelyResult.embedHtml) {
-        return NextResponse.json({
-          success: true,
-          player_type: "iframe_fallback",
-          iframe_html: iframelyResult.embedHtml,
-          original_url,
-        });
-      }
-    }
-
-    const microlinkUrl = `https://api.microlink.io?url=${encodeURIComponent(original_url)}&video=true`;
-    const response = await fetch(microlinkUrl, {
-      headers: { "User-Agent": "AlgoScroll/6.0" },
-      next: { revalidate: 43200 }, // Cache 12 hours
-    });
-
-    const result = await response.json();
-
-    if (result.status === "success" && result.data?.video?.url) {
+    if (iframelyResult?.playerType === "direct_mp4" && iframelyResult.streamUrl) {
       return NextResponse.json({
         success: true,
         player_type: "direct_mp4",
-        stream_url: result.data.video.url,
-        thumbnail: result.data.image?.url ?? "",
-        duration: result.data.video.duration ?? 0,
-        creator: result.data.author || result.data.publisher || "@creator",
+        stream_url: iframelyResult.streamUrl,
+        thumbnail: iframelyResult.thumbnail,
+        duration: iframelyResult.duration,
+        creator: iframelyResult.creator,
+      });
+    }
+    if (iframelyResult?.playerType === "iframe" && iframelyResult.embedUrl) {
+      return NextResponse.json({
+        success: true,
+        player_type: "iframe",
+        embed_url: iframelyResult.embedUrl,
       });
     }
 
-    // 3. Fallback Mode if direct stream extraction fails
+    const microlinkUrl = `https://api.microlink.io?url=${encodeURIComponent(original_url)}&video=true`;
+    let microlinkResult: { status?: string; data?: { video?: { url?: string; duration?: number }; image?: { url?: string }; author?: string; publisher?: string; iframe?: { html?: string } } } | null = null;
+    try {
+      const response = await fetch(microlinkUrl, {
+        headers: { "User-Agent": "AlgoScroll/6.0" },
+        next: { revalidate: 43200 }, // Cache 12 hours
+      });
+      microlinkResult = await response.json();
+    } catch {
+      microlinkResult = null;
+    }
+
+    if (microlinkResult?.status === "success" && microlinkResult.data?.video?.url) {
+      return NextResponse.json({
+        success: true,
+        player_type: "direct_mp4",
+        stream_url: microlinkResult.data.video.url,
+        thumbnail: microlinkResult.data.image?.url ?? "",
+        duration: microlinkResult.data.video.duration ?? 0,
+        creator: microlinkResult.data.author || microlinkResult.data.publisher || "@creator",
+      });
+    }
+
+    // 3. Neither provider gave a real playable video for tiktok/instagram —
+    // swap in an AI-picked same-topic YouTube Short instead of the platform's
+    // own (often unreliable/embed-restricted) oEmbed widget.
+    if ((platform === "tiktok" || platform === "instagram") && topic) {
+      const embedUrl = await resolveTopicYouTubeShort(topic);
+      if (embedUrl) {
+        return NextResponse.json({
+          success: true,
+          player_type: "iframe",
+          embed_url: embedUrl,
+        });
+      }
+    }
+
+    // 4. Last resort — whichever oEmbed widget html is available.
     return NextResponse.json({
       success: true,
       player_type: "iframe_fallback",
-      iframe_html: result.data?.iframe?.html ?? null,
+      iframe_html: iframelyResult?.embedHtml ?? microlinkResult?.data?.iframe?.html ?? null,
       original_url,
     });
   } catch {

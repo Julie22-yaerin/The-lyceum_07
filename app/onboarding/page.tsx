@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
+import AuthGuard from "@/components/AuthGuard";
 import { CameraIcon, CheckIcon } from "@/components/icons";
 import { mockProfile } from "@/lib/mock-data";
 import { getStoredProfile, saveStoredProfile } from "@/lib/storage";
@@ -25,13 +26,14 @@ function OnboardingForm() {
   useEffect(() => {
     // Only prefill when editing an existing profile — a first-time visitor
     // should see a blank form, not the demo account's mock name/bio.
-    const stored = getStoredProfile();
-    if (!stored) return;
-    setName(stored.name ?? "");
-    setHandle((stored.handle ?? "").replace(/^@/, ""));
-    setBio(stored.bio ?? "");
-    setAvatarColor(stored.avatarColor ?? AVATAR_COLORS[0]);
-    setAvatarPhoto(stored.avatarPhoto ?? null);
+    getStoredProfile().then((stored) => {
+      if (!stored) return;
+      setName(stored.name ?? "");
+      setHandle((stored.handle ?? "").replace(/^@/, ""));
+      setBio(stored.bio ?? "");
+      setAvatarColor(stored.avatarColor ?? AVATAR_COLORS[0]);
+      setAvatarPhoto(stored.avatarPhoto ?? null);
+    });
   }, []);
 
   const handlePhotoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,7 +54,9 @@ function OnboardingForm() {
 
   const isLastStep = step === STEPS.length - 1;
 
-  const handleNext = () => {
+  const [saving, setSaving] = useState(false);
+
+  const handleNext = async () => {
     if (!canProceed) return;
     if (!isLastStep) {
       setStep((s) => s + 1);
@@ -66,7 +70,8 @@ function OnboardingForm() {
       avatarPhoto,
       referralCode: mockProfile.referralCode,
     };
-    saveStoredProfile(profile);
+    setSaving(true);
+    await saveStoredProfile(profile);
     router.push(redirectTo);
   };
 
@@ -229,10 +234,10 @@ function OnboardingForm() {
         <button
           type="button"
           onClick={handleNext}
-          disabled={!canProceed}
+          disabled={!canProceed || saving}
           className="h-12 flex-[2] rounded-pill bg-accent-strong text-[15px] font-semibold text-white transition-transform duration-100 ease-out active:scale-[0.97] disabled:opacity-40"
         >
-          {isLastStep ? "Get started" : "Next"}
+          {saving ? "Saving…" : isLastStep ? "Get started" : "Next"}
         </button>
       </div>
     </div>
@@ -241,8 +246,10 @@ function OnboardingForm() {
 
 export default function OnboardingPage() {
   return (
-    <Suspense fallback={null}>
-      <OnboardingForm />
-    </Suspense>
+    <AuthGuard>
+      <Suspense fallback={null}>
+        <OnboardingForm />
+      </Suspense>
+    </AuthGuard>
   );
 }

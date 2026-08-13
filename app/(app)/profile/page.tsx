@@ -1,14 +1,18 @@
 "use client";
 
+import { signOut } from "firebase/auth";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { AwardIcon, ChevronRightIcon, CopyIcon, FlameIcon } from "@/components/icons";
 import ThemeToggle from "@/components/ThemeToggle";
+import { auth } from "@/lib/firebase/client";
 import { mockAchievements, mockFriends, mockProfile } from "@/lib/mock-data";
 import { getStoredProfile } from "@/lib/storage";
 import type { UserProfile } from "@/lib/types";
 
 export default function ProfilePage() {
+  const router = useRouter();
   const [copied, setCopied] = useState(false);
   const [profile, setProfile] = useState<UserProfile>(mockProfile);
   const [inviteLink, setInviteLink] = useState(
@@ -16,8 +20,9 @@ export default function ProfilePage() {
   );
 
   useEffect(() => {
-    const stored = getStoredProfile();
-    if (stored) setProfile((prev) => ({ ...prev, ...stored }));
+    getStoredProfile().then((stored) => {
+      if (stored) setProfile((prev) => ({ ...prev, ...stored }));
+    });
     setInviteLink(`${window.location.origin}/invite/${mockProfile.referralCode}`);
   }, []);
 
@@ -165,12 +170,21 @@ export default function ProfilePage() {
         </div>
 
         {/* Appearance */}
-        <div className="mb-6 mt-5 overflow-hidden rounded-panel bg-surface shadow-panel">
+        <div className="mt-5 overflow-hidden rounded-panel bg-surface shadow-panel">
           <div className="flex min-h-[56px] items-center justify-between px-4 py-3">
             <span className="text-[15px] font-medium text-text">Appearance</span>
             <ThemeToggle className="bg-surface-3" />
           </div>
         </div>
+
+        {/* Sign out */}
+        <button
+          type="button"
+          onClick={() => signOut(auth).then(() => router.replace("/login"))}
+          className="mb-6 mt-5 flex h-12 w-full items-center justify-center rounded-panel bg-surface text-[15px] font-medium text-danger shadow-panel transition-colors duration-150 active:bg-surface-2"
+        >
+          Sign out
+        </button>
       </div>
     </div>
   );

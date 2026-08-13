@@ -40,6 +40,7 @@ export default function VideoSlide({ video, isActive, shouldRender }: VideoSlide
           body: JSON.stringify({
             original_url: video.original_url,
             platform: video.platform,
+            topic: video.topic_id,
           }),
         });
         const data: ResolveResponse = await res.json();
@@ -66,7 +67,7 @@ export default function VideoSlide({ video, isActive, shouldRender }: VideoSlide
     return () => {
       cancelled = true;
     };
-  }, [resolved, shouldRender, video.original_url, video.platform]);
+  }, [resolved, shouldRender, video.original_url, video.platform, video.topic_id]);
 
   if (!shouldRender) {
     return (

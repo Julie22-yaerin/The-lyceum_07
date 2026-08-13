@@ -35,9 +35,11 @@ export default function VideoActions({ videoId }: VideoActionsProps) {
   const [shareConfirmation, setShareConfirmation] = useState<string | null>(null);
 
   useEffect(() => {
-    setLiked(getLikedVideoIds().has(videoId));
-    const stored = getStoredComments()[videoId] ?? [];
-    if (stored.length) setComments([...seedComments, ...stored]);
+    getLikedVideoIds().then((ids) => setLiked(ids.has(videoId)));
+    getStoredComments().then((all) => {
+      const stored = all[videoId] ?? [];
+      if (stored.length) setComments([...seedComments, ...stored]);
+    });
     // seedComments intentionally excluded — it's derived fresh from videoId each render
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [videoId]);
@@ -46,7 +48,7 @@ export default function VideoActions({ videoId }: VideoActionsProps) {
     const next = !liked;
     setLiked(next);
     setLikeCount((count) => count + (next ? 1 : -1));
-    setVideoLiked(videoId, next);
+    void setVideoLiked(videoId, next);
   };
 
   const handleAddComment = (text: string, mentions: string[]) => {
@@ -59,7 +61,7 @@ export default function VideoActions({ videoId }: VideoActionsProps) {
       createdAt: "Now",
     };
     setComments((prev) => [...prev, comment]);
-    addStoredComment(comment);
+    void addStoredComment(comment);
   };
 
   const handleShare = (friendId: string) => {
@@ -81,7 +83,7 @@ export default function VideoActions({ videoId }: VideoActionsProps) {
           creatorHandle: video.creator_handle,
         },
       };
-      sendMessageToFriend(friendId, message);
+      void sendMessageToFriend(friendId, message);
     }
 
     setShareConfirmation(`Sent to ${friend.name}`);

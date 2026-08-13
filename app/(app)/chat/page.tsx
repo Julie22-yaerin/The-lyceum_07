@@ -19,22 +19,22 @@ export default function ChatInboxPage() {
   const [lastMessages, setLastMessages] = useState<Record<string, string>>(mockLastMessage);
 
   useEffect(() => {
-    const read = getReadThreadIds();
-    setUnreadIds(
-      new Set(Array.from(mockInitiallyUnread).filter((id) => !read.has(id)))
-    );
+    getReadThreadIds().then((read) => {
+      setUnreadIds(new Set(Array.from(mockInitiallyUnread).filter((id) => !read.has(id))));
+    });
 
-    const sent = getSentMessages();
-    const overrides: Record<string, string> = {};
-    for (const friend of mockFriends) {
-      const thread = sent[friend.id];
-      if (!thread || thread.length === 0) continue;
-      const latest = thread[thread.length - 1];
-      overrides[friend.id] = latest.sharedVideo ? "You shared a video" : latest.text;
-    }
-    if (Object.keys(overrides).length > 0) {
-      setLastMessages((prev) => ({ ...prev, ...overrides }));
-    }
+    getSentMessages().then((sent) => {
+      const overrides: Record<string, string> = {};
+      for (const friend of mockFriends) {
+        const thread = sent[friend.id];
+        if (!thread || thread.length === 0) continue;
+        const latest = thread[thread.length - 1];
+        overrides[friend.id] = latest.sharedVideo ? "You shared a video" : latest.text;
+      }
+      if (Object.keys(overrides).length > 0) {
+        setLastMessages((prev) => ({ ...prev, ...overrides }));
+      }
+    });
   }, []);
 
   const friends = mockFriends.filter((friend) => {

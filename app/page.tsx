@@ -53,7 +53,7 @@ export default function Home() {
         </p>
         <div className="mt-7 flex flex-wrap items-center gap-3">
           <Link
-            href="/onboarding"
+            href="/login"
             className="flex h-11 items-center rounded-pill bg-accent-strong px-6 text-[15px] font-semibold text-white transition-transform duration-100 ease-out active:scale-[0.97]"
           >
             Start scrolling
@@ -126,10 +126,10 @@ export default function Home() {
               Ready to be productively lazy?
             </h2>
             <p className="mt-2.5 max-w-[460px] text-[14px] leading-[1.6] text-white/80">
-              No sign-up flow to sit through. Open the feed and the first quiz is four videos away.
+              Thirty seconds to sign in, and the first quiz is four videos away.
             </p>
             <Link
-              href="/feed"
+              href="/login"
               className="mt-5 inline-flex h-[42px] items-center rounded-pill border border-white/[0.22] bg-white/[0.16] px-5 text-[13.5px] font-semibold text-white backdrop-blur-[8px] transition-transform duration-100 ease-out active:scale-[0.97]"
             >
               Open the feed →

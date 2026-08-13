@@ -14,9 +14,11 @@ export default function ChatThreadPage({ params }: { params: { friendId: string 
   const [draft, setDraft] = useState("");
 
   useEffect(() => {
-    markThreadRead(params.friendId);
-    const sent = getSentMessages()[params.friendId] ?? [];
-    if (sent.length > 0) setMessages([...seedMessages, ...sent]);
+    void markThreadRead(params.friendId);
+    getSentMessages().then((all) => {
+      const sent = all[params.friendId] ?? [];
+      if (sent.length > 0) setMessages([...seedMessages, ...sent]);
+    });
     // seedMessages is derived fresh from params.friendId each render
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.friendId]);
