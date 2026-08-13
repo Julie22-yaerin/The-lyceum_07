@@ -244,3 +244,22 @@ Implement the Production Media Engine using Microlink API for video extraction. 
 ### Notes
 - StreakBar/ShareDrawer currently run on local component state (mock friends). Wiring them to real `friendships` / `direct_messages` tables needs a configured Supabase project (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) — not available in this environment.
 - Video playback testing (real TikTok/IG/X/YouTube URLs against the Microlink API) is deferred per user request.
+- **Fetching provider keys (Iframely, AI API)**: placeholders added to `.env.example`; actual values to be provided by the user directly into Railway's environment variables (not pasted in chat) once integration work starts.
+
+## Visual Design — Apple Liquid Glass (dark-grey / light-blue)
+
+Redesigned the app chrome (not the video canvas) using the Apple Liquid Glass design system, adapted to a dark, video-first surface:
+
+- **Palette**: pure-black video canvas (`--bg`), dark-grey elevated surfaces for sheets/panels (`--surface #1c1c1e`, `--surface-2 #2c2c2e`), one light-blue accent (`--accent #5ac8fa`) reserved for emphasis (streak flame, focus states). Correctness feedback in the quiz uses green/red (`--live` / `--danger`) since that's meaning, not decoration.
+- **StreakBar**: two glass pills (`backdrop-filter: blur(20px) saturate(180%)`) floating over the feed — a Lucide flame icon (not emoji) + tabular-nums streak count, and a share action with a real share-glyph icon.
+- **ShareDrawer**: rebuilt as an iOS-style edge-anchored bottom sheet (grab handle, top-rounded `--r-panel`, spring easing `cubic-bezier(0.32,0.72,0,1)`, same-path enter/exit, `prefers-reduced-motion` cross-fade fallback) instead of a plain centered modal. Friends render as one unified panel with hairline dividers, not fragmented cards.
+- **QuizCard**: options are one unified panel with hairline dividers (previously separate bordered buttons — fixed to follow the "panel not cards" rule); reveal state dims non-answers and marks correct/incorrect with icon + color.
+- Dropped the unused Geist local fonts in favor of the system font stack (`-apple-system, ... 'SF Pro Text' ...`) per the skill's typography rule.
+- Tokens live in `app/globals.css` (`:root` custom properties) and are exposed as Tailwind utilities in `tailwind.config.ts` (`bg-surface`, `text-text-2`, `rounded-panel`, etc.) — components reference tokens, no hard-coded one-off hex/px values.
+
+## Railway Deployment
+
+- `railway.json` pins the Nixpacks builder with explicit `npm run build` / `npm run start`, plus an on-failure restart policy.
+- `package.json` start script binds to Railway's injected port: `next start -p ${PORT:-3000}` (verified locally with `PORT=8080 npm run start`) — the most common cause of a Next.js app failing to come up on Railway is `next start` defaulting to port 3000 while Railway's health check probes `$PORT`.
+- Added `engines.node >=18.18.0` so Nixpacks picks a consistent Node version.
+- **Not done from this session**: actually triggering/monitoring a Railway deploy — no Railway CLI token or MCP connector is available here. If the GitHub repo is already connected to a Railway project with auto-deploy on `main`, pushing this branch should trigger a build; otherwise a Railway API token (or the real build error log) is needed to go further.

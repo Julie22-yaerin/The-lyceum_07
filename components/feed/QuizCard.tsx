@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CheckIcon, XIcon } from "@/components/icons";
 import type { QuizCardData } from "@/lib/types";
 
 interface QuizCardProps {
@@ -15,17 +16,25 @@ export default function QuizCard({ quiz }: QuizCardProps) {
     setSelected(index);
   };
 
+  const revealed = selected !== null;
+
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center gap-6 bg-gradient-to-br from-indigo-950 via-slate-900 to-black px-6 text-white">
-      <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium uppercase tracking-wide text-white/70">
+    <div className="flex h-full w-full flex-col items-center justify-center gap-6 bg-bg px-6">
+      <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-text-3">
         Active Recall
       </span>
-      <p className="max-w-md text-center text-xl font-semibold">{quiz.question}</p>
-      <div className="flex w-full max-w-md flex-col gap-3">
+
+      <p className="max-w-[360px] text-balance text-center text-[clamp(20px,3.4vw,26px)] font-bold leading-[1.25] tracking-[-0.02em] text-text">
+        {quiz.question}
+      </p>
+
+      <div className="w-full max-w-[400px] overflow-hidden rounded-panel bg-surface shadow-panel">
         {quiz.options.map((option, index) => {
           const isCorrect = index === quiz.correct_index;
           const isSelected = index === selected;
-          const revealed = selected !== null;
+          const showCorrect = revealed && isCorrect;
+          const showWrong = revealed && isSelected && !isCorrect;
+          const dimmed = revealed && !isSelected && !isCorrect;
 
           return (
             <button
@@ -33,17 +42,15 @@ export default function QuizCard({ quiz }: QuizCardProps) {
               type="button"
               onClick={() => handleSelect(index)}
               disabled={revealed}
-              className={[
-                "rounded-xl border px-4 py-3 text-left text-sm font-medium transition-colors",
-                !revealed && "border-white/20 bg-white/5 hover:bg-white/10",
-                revealed && isCorrect && "border-emerald-400 bg-emerald-400/20",
-                revealed && isSelected && !isCorrect && "border-rose-400 bg-rose-400/20",
-                revealed && !isSelected && !isCorrect && "border-white/10 bg-white/5 opacity-60",
-              ]
-                .filter(Boolean)
-                .join(" ")}
+              className={`flex min-h-11 w-full items-center justify-between gap-3 px-4 py-3.5 text-left text-[15px] font-medium transition-colors duration-150 ${
+                index > 0 ? "border-t border-hairline" : ""
+              } ${!revealed ? "text-text active:bg-surface-2" : ""} ${
+                showCorrect ? "bg-surface-2 text-text" : ""
+              } ${showWrong ? "bg-surface-2 text-text" : ""} ${dimmed ? "text-text-3" : ""}`}
             >
-              {option}
+              <span>{option}</span>
+              {showCorrect && <CheckIcon width={18} height={18} className="shrink-0 text-live" />}
+              {showWrong && <XIcon width={18} height={18} className="shrink-0 text-danger" />}
             </button>
           );
         })}

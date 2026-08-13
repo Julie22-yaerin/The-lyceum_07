@@ -25,7 +25,7 @@ export default function HomeClient({ videos, quizzes, friends: initialFriends }:
   };
 
   return (
-    <div className="relative h-screen w-full">
+    <div className="relative h-screen w-full bg-bg">
       <StreakBar streakCount={topStreak} friends={friends} onShare={handleShare} />
       <FeedScroll videos={videos} quizzes={quizzes} />
     </div>

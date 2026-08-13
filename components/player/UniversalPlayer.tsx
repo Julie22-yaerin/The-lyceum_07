@@ -68,7 +68,7 @@ export default function UniversalPlayer({
 
   return (
     <div
-      className={`relative h-full w-full overflow-hidden bg-black ${className}`}
+      className={`relative h-full w-full overflow-hidden bg-bg ${className}`}
       style={{ touchAction: "pan-y" }}
       onClick={toggleMute}
     >
@@ -84,7 +84,7 @@ export default function UniversalPlayer({
 
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-text-4 border-t-accent" />
         </div>
       )}
 
@@ -129,7 +129,7 @@ export default function UniversalPlayer({
             dangerouslySetInnerHTML={{ __html: iframeHtml }}
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center text-sm text-white/70">
+          <div className="flex h-full w-full items-center justify-center text-[14px] text-text-3">
             Unable to load preview
           </div>
         )

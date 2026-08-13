@@ -69,7 +69,7 @@ export default function FeedScroll({ videos, quizzes }: FeedScrollProps) {
             ) : shouldRender ? (
               <QuizCard quiz={slide.data} />
             ) : (
-              <div className="h-full w-full bg-black" />
+              <div className="h-full w-full bg-bg" />
             )}
           </div>
         );

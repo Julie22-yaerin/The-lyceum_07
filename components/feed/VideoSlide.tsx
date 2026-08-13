@@ -69,7 +69,7 @@ export default function VideoSlide({ video, isActive, shouldRender }: VideoSlide
 
   if (!shouldRender) {
     return (
-      <div className="h-full w-full bg-black">
+      <div className="h-full w-full bg-bg">
         {video.thumbnail_url && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -85,7 +85,7 @@ export default function VideoSlide({ video, isActive, shouldRender }: VideoSlide
 
   if (error) {
     return (
-      <div className="flex h-full w-full items-center justify-center bg-black text-sm text-white/70">
+      <div className="flex h-full w-full items-center justify-center bg-bg text-[14px] text-text-3">
         Video unavailable
       </div>
     );
@@ -93,7 +93,7 @@ export default function VideoSlide({ video, isActive, shouldRender }: VideoSlide
 
   if (!resolved) {
     return (
-      <div className="relative h-full w-full bg-black">
+      <div className="relative h-full w-full bg-bg">
         {video.thumbnail_url && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -104,7 +104,7 @@ export default function VideoSlide({ video, isActive, shouldRender }: VideoSlide
           />
         )}
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-text-4 border-t-accent" />
         </div>
       </div>
     );
