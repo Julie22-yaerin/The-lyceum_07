@@ -1,5 +1,8 @@
 const OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
-const DEFAULT_MODEL = process.env.OPENROUTER_MODEL || "openai/gpt-4o-mini";
+// Defaults to a free-tier model — paid models 402 on an account with no
+// purchased credits (verified live). Override via OPENROUTER_MODEL once
+// billing is set up.
+const DEFAULT_MODEL = process.env.OPENROUTER_MODEL || "openai/gpt-oss-20b:free";
 
 interface ChatMessage {
   role: "system" | "user" | "assistant";

@@ -69,6 +69,14 @@ export async function POST(req: Request): Promise<NextResponse<ResolveResponse>>
           embed_url: iframelyResult.embedUrl,
         });
       }
+      if (iframelyResult.playerType === "iframe_fallback" && iframelyResult.embedHtml) {
+        return NextResponse.json({
+          success: true,
+          player_type: "iframe_fallback",
+          iframe_html: iframelyResult.embedHtml,
+          original_url,
+        });
+      }
     }
 
     const microlinkUrl = `https://api.microlink.io?url=${encodeURIComponent(original_url)}&video=true`;

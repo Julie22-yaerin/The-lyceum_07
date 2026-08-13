@@ -36,9 +36,9 @@ export const mockVideos: VideoItem[] = [
     topic_id: "meme-break",
     content_type: "entertainment",
     platform: "tiktok",
-    original_url: "https://www.tiktok.com/@example/video/1234567890",
+    original_url: "https://www.tiktok.com/@scout2015/video/6718335390845095173",
     thumbnail_url: null,
-    creator_handle: "@funny_clips",
+    creator_handle: "@scout2015",
     duration_seconds: 15,
   },
 ];

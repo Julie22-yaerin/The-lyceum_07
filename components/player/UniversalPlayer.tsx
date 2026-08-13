@@ -31,6 +31,7 @@ export default function UniversalPlayer({
 }: UniversalPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const fallbackRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
 
@@ -54,6 +55,36 @@ export default function UniversalPlayer({
     if (playerType !== "iframe") return;
     postYouTubeCommand(iframeRef.current, isActive ? "playVideo" : "pauseVideo");
   }, [isActive, playerType]);
+
+  // oEmbed widgets (TikTok/Instagram via Iframely) ship a <blockquote> +
+  // loader <script>. Neither dangerouslySetInnerHTML nor raw innerHTML
+  // executes embedded <script> tags, so the widget renders inert unless
+  // each one is re-created and re-appended — that DOES execute.
+  useEffect(() => {
+    if (playerType !== "iframe_fallback") return;
+
+    // No embeddable HTML at all — show the empty state immediately
+    // instead of leaving the spinner stuck on top of it forever.
+    if (!iframeHtml || !fallbackRef.current) {
+      setIsLoading(false);
+      return;
+    }
+
+    const container = fallbackRef.current;
+    container.innerHTML = iframeHtml;
+
+    const scripts = Array.from(container.querySelectorAll("script"));
+    scripts.forEach((oldScript) => {
+      const newScript = document.createElement("script");
+      Array.from(oldScript.attributes).forEach((attr) =>
+        newScript.setAttribute(attr.name, attr.value)
+      );
+      newScript.textContent = oldScript.textContent;
+      oldScript.replaceWith(newScript);
+    });
+
+    setIsLoading(false);
+  }, [playerType, iframeHtml]);
 
   const toggleMute = () => {
     setIsMuted((prev) => {
@@ -121,12 +152,8 @@ export default function UniversalPlayer({
       {playerType === "iframe_fallback" && (
         iframeHtml ? (
           <div
-            className="h-full w-full [&_iframe]:h-full [&_iframe]:w-full"
-            onLoad={() => setIsLoading(false)}
-            ref={(node) => {
-              if (node) setIsLoading(false);
-            }}
-            dangerouslySetInnerHTML={{ __html: iframeHtml }}
+            ref={fallbackRef}
+            className="h-full w-full overflow-y-auto bg-white px-3 pb-24 pt-16 [&>*]:mx-auto [&_iframe]:h-full [&_iframe]:w-full"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-[14px] text-text-3">

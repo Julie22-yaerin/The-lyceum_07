@@ -1,5 +1,6 @@
 interface IframelyLink {
-  href: string;
+  href?: string;
+  html?: string;
   type?: string;
   rel?: string[];
 }
@@ -15,14 +16,16 @@ interface IframelyResponse {
     thumbnail?: IframelyLink[];
     player?: IframelyLink[];
     video?: IframelyLink[];
+    app?: IframelyLink[];
   };
-  error?: number;
+  error?: string;
 }
 
 export interface IframelyResolved {
-  playerType: "direct_mp4" | "iframe";
+  playerType: "direct_mp4" | "iframe" | "iframe_fallback";
   streamUrl?: string;
   embedUrl?: string;
+  embedHtml?: string;
   thumbnail: string;
   duration: number;
   creator: string;
@@ -30,8 +33,8 @@ export interface IframelyResolved {
 
 /**
  * Resolves a video URL via the Iframely API. Returns null (never throws)
- * on missing config, network failure, or no usable video/player link —
- * callers are expected to fall back to another provider.
+ * on missing config, network failure, or no usable link — callers are
+ * expected to fall back to another provider.
  */
 export async function resolveWithIframely(targetUrl: string): Promise<IframelyResolved | null> {
   const apiKey = process.env.IFRAMELY_API_KEY;
@@ -63,11 +66,19 @@ export async function resolveWithIframely(targetUrl: string): Promise<IframelyRe
     return { playerType: "direct_mp4", streamUrl: videoLink, thumbnail, duration, creator };
   }
 
-  // Most platforms (TikTok/IG/X) only grant an official embeddable player,
-  // not a raw file — that's still a real playable result.
+  // A simple <iframe src="..."> embed — YouTube/Vimeo-style providers.
   const playerLink = data.links?.player?.[0]?.href;
   if (playerLink) {
     return { playerType: "iframe", embedUrl: playerLink, thumbnail, duration, creator };
+  }
+
+  // TikTok/Instagram real-world responses grant an oEmbed "app" widget
+  // instead (a <blockquote> + loader <script>), not a raw file or a plain
+  // iframe. Still a real, playable result — just needs script execution
+  // on the client (handled in UniversalPlayer), not a src URL.
+  const appEmbed = data.links?.app?.[0]?.html;
+  if (appEmbed) {
+    return { playerType: "iframe_fallback", embedHtml: appEmbed, thumbnail, duration, creator };
   }
 
   return null;
