@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { resolveWithIframely } from "@/lib/media/iframely";
 import type { Platform, ResolveRequestBody, ResolveResponse } from "@/lib/types";
 
 const ALLOWED_PLATFORMS: readonly Platform[] = [
@@ -48,7 +49,28 @@ export async function POST(req: Request): Promise<NextResponse<ResolveResponse>>
       }
     }
 
-    // 2. TikTok / Instagram / X Strategy (Microlink API)
+    // 2. TikTok / Instagram / X Strategy — Iframely first, Microlink as fallback
+    const iframelyResult = await resolveWithIframely(original_url);
+    if (iframelyResult) {
+      if (iframelyResult.playerType === "direct_mp4" && iframelyResult.streamUrl) {
+        return NextResponse.json({
+          success: true,
+          player_type: "direct_mp4",
+          stream_url: iframelyResult.streamUrl,
+          thumbnail: iframelyResult.thumbnail,
+          duration: iframelyResult.duration,
+          creator: iframelyResult.creator,
+        });
+      }
+      if (iframelyResult.playerType === "iframe" && iframelyResult.embedUrl) {
+        return NextResponse.json({
+          success: true,
+          player_type: "iframe",
+          embed_url: iframelyResult.embedUrl,
+        });
+      }
+    }
+
     const microlinkUrl = `https://api.microlink.io?url=${encodeURIComponent(original_url)}&video=true`;
     const response = await fetch(microlinkUrl, {
       headers: { "User-Agent": "AlgoScroll/6.0" },
@@ -77,7 +99,7 @@ export async function POST(req: Request): Promise<NextResponse<ResolveResponse>>
     });
   } catch {
     return NextResponse.json(
-      { success: false, error: "Microlink Extraction Failed" },
+      { success: false, error: "Media Extraction Failed" },
       { status: 500 }
     );
   }

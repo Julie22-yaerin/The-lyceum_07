@@ -263,3 +263,26 @@ Redesigned the app chrome (not the video canvas) using the Apple Liquid Glass de
 - `package.json` start script binds to Railway's injected port: `next start -p ${PORT:-3000}` (verified locally with `PORT=8080 npm run start`) — the most common cause of a Next.js app failing to come up on Railway is `next start` defaulting to port 3000 while Railway's health check probes `$PORT`.
 - Added `engines.node >=18.18.0` so Nixpacks picks a consistent Node version.
 - **Not done from this session**: actually triggering/monitoring a Railway deploy — no Railway CLI token or MCP connector is available here. If the GitHub repo is already connected to a Railway project with auto-deploy on `main`, pushing this branch should trigger a build; otherwise a Railway API token (or the real build error log) is needed to go further.
+
+## Landing Page — "The Lyceum"
+
+- New root route `app/page.tsx`: Apple Liquid Glass marketing page positioning **The Lyceum — the unfair advantage for laziness**. Glass sticky nav (`components/marketing/LandingNav.tsx`, scroll-edge hairline), hero, a unified "How it works" panel (3 rows, hairline-divided — not fragmented cards), an independent feature-card grid, a blue gradient CTA with light orbs (glass-on-color, still one accent hue), and a plain footer.
+- The actual product feed moved from `/` to `/feed` (`app/feed/page.tsx`) so `/` is a proper landing page and `/feed` is the app.
+- Verified with `tsc`/`lint`/`build` and Playwright screenshots at desktop (1280px) and mobile (390px) widths.
+
+## Fetching providers — Iframely + OpenRouter wired in
+
+The user provided 1 Iframely key and 3 OpenRouter keys directly in chat. **These are now considered exposed** (present in this session's conversation history) — recommend rotating them on iframe.ly and openrouter.ai once things are stable. They were written only to a local `.env` (gitignored, never committed — verified with `git check-ignore` and `git ls-files`).
+
+- `lib/media/iframely.ts`: calls `https://iframe.ly/api/iframely?url=...&key=...`, maps `links.video` → `direct_mp4`, else `links.player` → `iframe` (most TikTok/IG/X results are an official embeddable player, not a raw file — that's still treated as a real playable result), returns `null` on any failure so the caller can fall back.
+- `app/api/v1/media/resolve/route.ts`: for tiktok/instagram/twitter, tries Iframely first, then falls back to the existing Microlink call, then the iframe-embed fallback — unchanged behavior for `youtube` (native embed, no external call).
+- `lib/ai/openrouter.ts`: chat-completion client that rotates across up to 3 `OPENROUTER_API_KEY_*` keys — a key rejected/rate-limited (401/403/429) is skipped in favor of the next one. Model defaults to `openai/gpt-4o-mini`, overridable via `OPENROUTER_MODEL`.
+- `app/api/v1/ai/generate-quiz/route.ts`: first concrete AI feature — POST `{topic_id, title, description}` → an Active Recall `QuizCardData` generated via OpenRouter (JSON-mode prompt, shape-validated before returning). Video auto-tagging and a study-assistant chatbot (also requested) are **not built yet** — scoped out to avoid shipping three half-finished AI features; this one is complete end-to-end.
+
+### Live test results (this sandbox)
+`iframe.ly`, `api.microlink.io`, and `openrouter.ai` are all **blocked by this session's egress proxy** (`CONNECT tunnel failed, response 403` — confirmed via direct `curl`, independent of the app). This is an organization network policy for this sandbox, not a bug in the integration:
+- `POST /api/v1/media/resolve` with a YouTube URL → succeeds (no external call needed).
+- `POST /api/v1/media/resolve` with a TikTok URL → `{"success":false,"error":"Media Extraction Failed"}` (Iframely and Microlink both unreachable here).
+- `POST /api/v1/ai/generate-quiz` → `{"success":false,"error":"OpenRouter key rejected (403)"}` after trying all 3 keys in order (confirms the fallback loop itself works).
+
+Real video fetch / AI generation needs to be tested somewhere with open egress — e.g. the deployed Railway instance, or the user's own machine.
